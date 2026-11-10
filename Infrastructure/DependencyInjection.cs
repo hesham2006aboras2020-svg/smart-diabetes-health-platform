@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<Application.Interfaces.IDoctorPatientAlertsService, DoctorPatientAlertsService>();
         services.AddScoped<Application.Interfaces.IAdminUserService, AdminUserService>();
         services.AddScoped<Application.Interfaces.IAdminAuditLogService, AdminAuditLogService>();
+        services.AddScoped<Application.Interfaces.IPatientProfileService, PatientProfileService>();
         services.AddScoped<AdminSeeder>();
 
         services.AddIdentityCore<Domain.Entities.User>(options =>
