@@ -104,6 +104,7 @@ public sealed class AuthService(
 
     private async Task<AuthResponse> BuildResponseAsync(User user)
     {
+        var email = user.Email ?? throw new InvalidOperationException("User email is required to issue a token.");
         var expires = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenMinutes);
         var claims = new[]
         {
@@ -112,8 +113,6 @@ public sealed class AuthService(
             new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
-
-        var email = user.Email ?? throw new InvalidOperationException("User email is required to issue a token.");
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
