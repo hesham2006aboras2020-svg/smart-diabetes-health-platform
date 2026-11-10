@@ -26,6 +26,7 @@ public static class DependencyInjection
         services.AddScoped<Application.Interfaces.IHealthAnalyticsService, HealthAnalyticsService>();
         services.AddScoped<Application.Interfaces.IAlertService, AlertService>();
         services.AddScoped<Application.Interfaces.IDoctorDashboardService, DoctorDashboardService>();
+        services.AddScoped<Application.Interfaces.IHealthReportService, HealthReportService>();
         services.AddScoped<AdminSeeder>();
 
         services.AddIdentityCore<Domain.Entities.User>(options =>
