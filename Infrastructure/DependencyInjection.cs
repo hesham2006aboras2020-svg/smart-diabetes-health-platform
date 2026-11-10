@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Infrastructure.Authentication;
 
 namespace Infrastructure;
 
@@ -12,6 +13,10 @@ public static class DependencyInjection
     {
         services.AddDbContext<DiabetesDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+
+        services.AddScoped<Application.Interfaces.IAuthService, AuthService>();
 
         services.AddIdentityCore<Domain.Entities.User>(options =>
         {
