@@ -92,7 +92,7 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
         var first = values.Take(midpoint).Average();
         var second = values.Skip(midpoint).Average();
         var difference = second - first;
-        return Math.Abs(difference) < 10m ? TrendType.Stable : difference > 0 ? TrendType.Rising : TrendType.Falling;
+        return Math.Abs(difference) < 10m ? TrendType.Stable : difference > 0 ? TrendType.Worsening : TrendType.Improving;
     }
 
     private static decimal CalculateStabilityScore(IReadOnlyList<decimal> values)
@@ -102,7 +102,7 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
         var low = values.Count(v => v < 70m) * 100m / values.Count;
         var trend = CalculateTrend(values);
         var penalty = Math.Min(40m, (high + low) * 0.8m);
-        var trendPenalty = trend == TrendType.Rising ? 10m : trend == TrendType.Falling ? 5m : 0m;
+        var trendPenalty = trend == TrendType.Worsening ? 10m : trend == TrendType.Improving ? 5m : 0m;
         var dataBonus = values.Count >= 7 ? 10m : values.Count / 7m * 10m;
         return Math.Round(Math.Clamp(inRange - penalty + dataBonus - trendPenalty, 0m, 100m), 2);
     }
