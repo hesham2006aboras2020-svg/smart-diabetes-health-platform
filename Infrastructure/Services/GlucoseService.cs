@@ -5,7 +5,7 @@ using Domain.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Services;
+namespace Infrastructure.Services;
 
 public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseService
 {
@@ -118,8 +118,6 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
         var high = values.Count(x => x > HighThresholdMgDl);
         var low = values.Count(x => x < LowThresholdMgDl);
 
-        var trend = CalculateTrend(values);
-
         return new GlucoseSummaryResponse(
             values.Count,
             Math.Round(average, 2),
@@ -128,7 +126,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
             Math.Round(inRange * 100m / values.Count, 2),
             Math.Round(high * 100m / values.Count, 2),
             Math.Round(low * 100m / values.Count, 2),
-            trend);
+            CalculateTrend(values));
     }
 
     private static void ValidateRequest(CreateGlucoseReadingRequest request)
