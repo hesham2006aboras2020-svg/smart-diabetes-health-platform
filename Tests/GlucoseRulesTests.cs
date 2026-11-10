@@ -1,4 +1,5 @@
 using Domain.Enums;
+using Xunit;
 using Domain.Rules;
 
 namespace Tests;
