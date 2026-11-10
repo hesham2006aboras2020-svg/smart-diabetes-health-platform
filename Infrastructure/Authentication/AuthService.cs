@@ -21,7 +21,7 @@ public sealed class AuthService(
 {
     private readonly JwtOptions _jwt = jwtOptions.Value;
 
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
+    public async Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
         if (!Enum.TryParse<Role>(request.Role, true, out var role) || role == Role.Admin)
             throw new InvalidOperationException("Only Patient and Doctor registration is allowed.");
@@ -72,7 +72,22 @@ public sealed class AuthService(
 
         await db.SaveChangesAsync(cancellationToken);
 
-        return await BuildResponseAsync(user);
+        if (role == Role.Doctor)
+        {
+            return new RegisterResponse(
+                "تم إنشاء حساب الطبيب بنجاح، وهو بانتظار موافقة الإدارة قبل تسجيل الدخول.",
+                role.ToString(),
+                user.AccountStatus.ToString(),
+                true,
+                null);
+        }
+
+        return new RegisterResponse(
+            "تم إنشاء الحساب بنجاح ويمكنك تسجيل الدخول الآن.",
+            role.ToString(),
+            user.AccountStatus.ToString(),
+            false,
+            await BuildResponseAsync(user));
     }
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)

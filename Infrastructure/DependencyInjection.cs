@@ -17,6 +17,8 @@ public static class DependencyInjection
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
 
         services.AddScoped<Application.Interfaces.IAuthService, AuthService>();
+        services.AddScoped<Application.Interfaces.IAdminService, AdminService>();
+        services.AddScoped<AdminSeeder>();
 
         services.AddIdentityCore<Domain.Entities.User>(options =>
         {
