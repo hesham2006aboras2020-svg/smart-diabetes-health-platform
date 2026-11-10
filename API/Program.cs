@@ -1,5 +1,5 @@
 using System.Text;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using Infrastructure;
 using Infrastructure.Authentication;
 using API.Middleware;
@@ -22,20 +22,11 @@ builder.Services.AddSwaggerGen(options =>
         Description = "أدخل رمز JWT بصيغة: Bearer {token}"
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+    options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        });
 });
 
 builder.Services.AddInfrastructure(builder.Configuration);
