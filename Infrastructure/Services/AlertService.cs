@@ -98,7 +98,7 @@ public sealed class AlertService(DiabetesDbContext db) : IAlertService
             .Select(x => x.Id)
             .SingleAsync(cancellationToken);
 
-        db.Alerts.Add(new Alert
+        var alert = new Alert
         {
             Id = Guid.NewGuid(),
             PatientId = patientId,
@@ -106,6 +106,20 @@ public sealed class AlertService(DiabetesDbContext db) : IAlertService
             Severity = severity,
             Message = message,
             IsRead = false,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        db.Alerts.Add(alert);
+        db.Notifications.Add(new Notification
+        {
+            Id = Guid.NewGuid(),
+            UserId = patientUserId,
+            AlertId = alert.Id,
+            Title = "تنبيه نمط متكرر",
+            Body = message,
+            Type = NotificationType.Alert,
+            IsSent = false,
+            SentAt = null,
             CreatedAt = DateTime.UtcNow
         });
 
