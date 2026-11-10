@@ -38,7 +38,7 @@ jobs:
 
       - name: Commit generated migration
         run: |
-          if git diff --quiet; then
+          if [ -z "$(git status --porcelain)" ]; then
             echo "No migration changes detected."
             exit 0
           fi
