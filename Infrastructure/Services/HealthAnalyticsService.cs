@@ -28,7 +28,7 @@ public sealed class HealthAnalyticsService(DiabetesDbContext db) : IHealthAnalyt
             return new HealthAnalyticsResponse(days, 0, null, null, null, null, null, null,
                 "InsufficientData", null, "InsufficientData", "Normal");
 
-        var values = readings.Select(x => ToMgDl(x.GlucoseValue, x.Unit)).ToList();
+        var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
         var inRangePercentage = values.Count(x => x is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
         var highPercentage = values.Count(x => x > GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
         var lowPercentage = values.Count(x => x < GlucoseRules.LowThresholdMgDl) * 100m / values.Count;
@@ -55,13 +55,6 @@ public sealed class HealthAnalyticsService(DiabetesDbContext db) : IHealthAnalyt
             stabilityLevel,
             priority);
     }
-
-    private static decimal ToMgDl(decimal value, GlucoseUnit unit) => unit switch
-    {
-        GlucoseUnit.MgDl => value,
-        GlucoseUnit.MmolL => value * 18m,
-        _ => throw new ArgumentException("وحدة قياس السكر غير مدعومة.")
-    };
 
     private static string CalculateTrend(IReadOnlyList<decimal> values)
     {
