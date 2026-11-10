@@ -1,9 +1,10 @@
+using Infrastructure.Authentication;
 using Infrastructure.Data;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Infrastructure.Authentication;
 
 namespace Infrastructure;
 
@@ -18,7 +19,7 @@ public static class DependencyInjection
 
         services.AddScoped<Application.Interfaces.IAuthService, AuthService>();
         services.AddScoped<Application.Interfaces.IAdminService, AdminService>();
-        services.AddScoped<Application.Interfaces.IGlucoseService, Application.Services.GlucoseService>();
+        services.AddScoped<Application.Interfaces.IGlucoseService, GlucoseService>();
         services.AddScoped<AdminSeeder>();
 
         services.AddIdentityCore<Domain.Entities.User>(options =>
