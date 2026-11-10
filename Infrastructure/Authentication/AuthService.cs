@@ -92,7 +92,9 @@ public sealed class AuthService(
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
-        var user = await userManager.FindByEmailAsync(request.Email.Trim());
+        var username = request.Username.Trim();
+        var user = await userManager.FindByNameAsync(username)
+            ?? await userManager.FindByEmailAsync(username);
         if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
             throw new UnauthorizedAccessException("Invalid email or password.");
 
