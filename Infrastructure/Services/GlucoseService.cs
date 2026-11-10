@@ -2,6 +2,7 @@ using Application.DTOs.Glucose;
 using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Rules;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,9 +10,6 @@ namespace Infrastructure.Services;
 
 public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseService
 {
-    private const decimal LowThresholdMgDl = 70m;
-    private const decimal HighThresholdMgDl = 180m;
-
     public async Task<GlucoseReadingResponse> AddReadingAsync(
         Guid userId,
         CreateGlucoseReadingRequest request,
@@ -25,7 +23,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
         if (patient is null)
             throw new UnauthorizedAccessException("حساب المريض غير موجود.");
 
-        var valueMgDl = ToMgDl(request.GlucoseValue, request.Unit);
+        var valueMgDl = GlucoseValueConverter.ToMgDl(request.GlucoseValue, request.Unit);
         var status = GetStatus(valueMgDl);
 
         var reading = new GlucoseReading
@@ -103,7 +101,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
             .ToListAsync(cancellationToken);
 
         return readings
-            .Select(x => Map(x, GetStatus(ToMgDl(x.GlucoseValue, x.Unit))))
+            .Select(x => Map(x, GetStatus(GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit))))
             .ToList();
     }
 
@@ -126,11 +124,11 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
         if (readings.Count == 0)
             return new GlucoseSummaryResponse(0, null, null, null, null, null, null, "InsufficientData");
 
-        var values = readings.Select(x => ToMgDl(x.GlucoseValue, x.Unit)).ToList();
+        var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
         var average = values.Average();
-        var inRange = values.Count(x => x is >= LowThresholdMgDl and <= HighThresholdMgDl);
-        var high = values.Count(x => x > HighThresholdMgDl);
-        var low = values.Count(x => x < LowThresholdMgDl);
+        var inRange = values.Count(x => x is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl);
+        var high = values.Count(x => x > GlucoseRules.HighThresholdMgDl);
+        var low = values.Count(x => x < GlucoseRules.LowThresholdMgDl);
 
         return new GlucoseSummaryResponse(
             values.Count,
@@ -148,7 +146,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
         if (request.GlucoseValue <= 0)
             throw new ArgumentException("قيمة سكر الدم يجب أن تكون أكبر من صفر.");
 
-        var valueMgDl = ToMgDl(request.GlucoseValue, request.Unit);
+        var valueMgDl = GlucoseValueConverter.ToMgDl(request.GlucoseValue, request.Unit);
 
         if (valueMgDl > 1000)
             throw new ArgumentException("قيمة سكر الدم المدخلة خارج النطاق المدعوم في المنصة.");
@@ -160,17 +158,9 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
             throw new ArgumentException("الملاحظات يجب ألا تتجاوز 500 حرف.");
     }
 
-    private static decimal ToMgDl(decimal value, GlucoseUnit unit) =>
-        unit switch
-        {
-            GlucoseUnit.MgDl => value,
-            GlucoseUnit.MmolL => value * 18m,
-            _ => throw new ArgumentException("وحدة قياس السكر غير مدعومة.")
-        };
-
     private static string GetStatus(decimal valueMgDl) =>
-        valueMgDl < LowThresholdMgDl ? "Low" :
-        valueMgDl > HighThresholdMgDl ? "High" :
+        valueMgDl < GlucoseRules.LowThresholdMgDl ? "Low" :
+        valueMgDl > GlucoseRules.HighThresholdMgDl ? "High" :
         "Normal";
 
     private static string CalculateTrend(IReadOnlyList<decimal> values)
@@ -183,10 +173,10 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
         var secondAverage = values.Skip(midpoint).Average();
         var difference = secondAverage - firstAverage;
 
-        if (Math.Abs(difference) < 10m)
+        if (Math.Abs(difference) < GlucoseRules.TrendStabilityDeltaMgDl)
             return "Stable";
 
-        return difference > 0 ? "Rising" : "Falling";
+        return difference > 0 ? TrendType.Worsening.ToString() : TrendType.Improving.ToString();
     }
 
     private static GlucoseReadingResponse Map(GlucoseReading reading, string status) =>
