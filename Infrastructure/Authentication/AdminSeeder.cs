@@ -12,16 +12,16 @@ public sealed class AdminSeeder(
 {
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
+        var username = configuration["AdminSeed:Username"]?.Trim();
         var email = configuration["AdminSeed:Email"]?.Trim().ToLowerInvariant();
         var password = configuration["AdminSeed:Password"];
         var fullName = configuration["AdminSeed:FullName"]?.Trim();
 
-        if (string.IsNullOrWhiteSpace(email) ||
+        if (string.IsNullOrWhiteSpace(username) ||
+            string.IsNullOrWhiteSpace(email) ||
             string.IsNullOrWhiteSpace(password) ||
             string.IsNullOrWhiteSpace(fullName))
-        {
             return;
-        }
 
         if (!await roleManager.RoleExistsAsync(Role.Admin.ToString()))
         {
@@ -33,11 +33,11 @@ public sealed class AdminSeeder(
                     string.Join("; ", roleResult.Errors.Select(x => x.Description)));
         }
 
-        var existing = await userManager.FindByEmailAsync(email);
+        var existing = await userManager.FindByNameAsync(username);
         if (existing is not null)
         {
             if (existing.Role != Role.Admin)
-                throw new InvalidOperationException("Configured admin email belongs to a non-admin account.");
+                throw new InvalidOperationException("Configured admin username belongs to a non-admin account.");
 
             if (!await userManager.IsInRoleAsync(existing, Role.Admin.ToString()))
             {
@@ -53,7 +53,7 @@ public sealed class AdminSeeder(
         var admin = new User
         {
             Id = Guid.NewGuid(),
-            UserName = email,
+            UserName = username,
             Email = email,
             EmailConfirmed = true,
             FullName = fullName,
