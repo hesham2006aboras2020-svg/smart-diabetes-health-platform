@@ -6,7 +6,6 @@ namespace Infrastructure.Data;
 
 public class DiabetesDbContext(DbContextOptions<DiabetesDbContext> options) : IdentityDbContext<User, Microsoft.AspNetCore.Identity.IdentityRole<Guid>, Guid>(options)
 {
-    public DbSet<User> Users => Set<User>();
     public DbSet<Patient> Patients => Set<Patient>();
     public DbSet<Doctor> Doctors => Set<Doctor>();
     public DbSet<DoctorApprovalRequest> DoctorApprovalRequests => Set<DoctorApprovalRequest>();

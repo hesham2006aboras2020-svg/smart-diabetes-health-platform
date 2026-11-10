@@ -20,6 +20,7 @@ public static class DependencyInjection
         services.AddScoped<Application.Interfaces.IAuthService, AuthService>();
         services.AddScoped<Application.Interfaces.IAdminService, AdminService>();
         services.AddScoped<Application.Interfaces.IGlucoseService, GlucoseService>();
+        services.AddScoped<Application.Interfaces.IMedicationService, MedicationService>();
         services.AddScoped<AdminSeeder>();
 
         services.AddIdentityCore<Domain.Entities.User>(options =>

@@ -50,7 +50,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
                 PatientId = patient.Id,
                 GlucoseReadingId = reading.Id,
                 AlertType = status == "Low" ? AlertType.LowGlucose : AlertType.HighGlucose,
-                Severity = AlertSeverity.Warning,
+                Severity = AlertSeverity.Medium,
                 Message = status == "Low"
                     ? "تم تسجيل قراءة سكر منخفضة وفق قواعد المنصة."
                     : "تم تسجيل قراءة سكر مرتفعة وفق قواعد المنصة.",

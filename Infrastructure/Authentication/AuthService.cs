@@ -54,7 +54,7 @@ public sealed class AuthService(
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
-                LicenseNumber = request.LicenseNumber.Trim(),
+                LicenseNumber = request.LicenseNumber?.Trim() ?? throw new InvalidOperationException("Doctor license number is required."),
                 Specialization = request.Specialization?.Trim(),
                 ClinicName = request.ClinicName?.Trim(),
                 CreatedAt = DateTime.UtcNow
@@ -104,15 +104,15 @@ public sealed class AuthService(
 
     private async Task<AuthResponse> BuildResponseAsync(User user)
     {
+        var email = user.Email ?? throw new InvalidOperationException("User email is required to issue a token.");
         var expires = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenMinutes);
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
+            new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
-
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
