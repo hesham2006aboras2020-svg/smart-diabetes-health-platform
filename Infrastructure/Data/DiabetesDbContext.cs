@@ -1,9 +1,10 @@
 using Domain.Entities;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data;
 
-public class DiabetesDbContext(DbContextOptions<DiabetesDbContext> options) : DbContext(options)
+public class DiabetesDbContext(DbContextOptions<DiabetesDbContext> options) : IdentityDbContext<User, Microsoft.AspNetCore.Identity.IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<User> Users => Set<User>();
     public DbSet<Patient> Patients => Set<Patient>();
@@ -31,6 +32,7 @@ public class DiabetesDbContext(DbContextOptions<DiabetesDbContext> options) : Db
             e.HasKey(x => x.Id);
             e.Property(x => x.FullName).HasMaxLength(150).IsRequired();
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
+            e.Property(x => x.UserName).HasMaxLength(256);
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
             e.Property(x => x.AccountStatus).HasConversion<string>().HasMaxLength(20);
