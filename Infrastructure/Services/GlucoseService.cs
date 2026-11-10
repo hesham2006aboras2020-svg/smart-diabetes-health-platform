@@ -44,7 +44,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
 
         if (status != "Normal")
         {
-            dbContext.Alerts.Add(new Alert
+            var alert = new Alert
             {
                 Id = Guid.NewGuid(),
                 PatientId = patient.Id,
@@ -55,6 +55,20 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
                     ? "تم تسجيل قراءة سكر منخفضة وفق قواعد المنصة."
                     : "تم تسجيل قراءة سكر مرتفعة وفق قواعد المنصة.",
                 IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            dbContext.Alerts.Add(alert);
+            dbContext.Notifications.Add(new Notification
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                AlertId = alert.Id,
+                Title = status == "Low" ? "تنبيه قراءة منخفضة" : "تنبيه قراءة مرتفعة",
+                Body = alert.Message,
+                Type = NotificationType.Alert,
+                IsSent = false,
+                SentAt = null,
                 CreatedAt = DateTime.UtcNow
             });
         }
