@@ -118,6 +118,9 @@ public sealed class MedicationService(DiabetesDbContext dbContext) : IMedication
 
         ValidateOptionalText(request.Notes, 500, "ملاحظات الجرعة يجب ألا تتجاوز 500 حرف.");
 
+        if (!Enum.IsDefined(request.Status))
+            throw new ArgumentException("حالة الجرعة غير مدعومة.");
+
         if (request.Status == Domain.Enums.MedicationLogStatus.Taken && !request.TakenAt.HasValue)
             throw new ArgumentException("يجب تسجيل وقت تناول الجرعة عند اختيار حالة تم تناولها.");
 
