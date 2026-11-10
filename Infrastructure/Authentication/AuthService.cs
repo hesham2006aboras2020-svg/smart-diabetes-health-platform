@@ -54,7 +54,7 @@ public sealed class AuthService(
             {
                 Id = Guid.NewGuid(),
                 UserId = user.Id,
-                LicenseNumber = request.LicenseNumber.Trim(),
+                LicenseNumber = request.LicenseNumber?.Trim() ?? throw new InvalidOperationException("Doctor license number is required."),
                 Specialization = request.Specialization?.Trim(),
                 ClinicName = request.ClinicName?.Trim(),
                 CreatedAt = DateTime.UtcNow
