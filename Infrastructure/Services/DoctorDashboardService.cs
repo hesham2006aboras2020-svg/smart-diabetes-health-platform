@@ -53,7 +53,7 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
                 continue;
             }
 
-            var values = readings.Select(x => x.Unit == GlucoseUnit.MmolL ? x.GlucoseValue * 18m : x.GlucoseValue).ToList();
+            var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
             var inRange = values.Count(x => x is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
             var high = values.Count(x => x > GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
             var low = values.Count(x => x < GlucoseRules.LowThresholdMgDl) * 100m / values.Count;
@@ -61,7 +61,7 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
             var midpoint = values.Count / 2;
             var trend = values.Count < 4
                 ? "InsufficientData"
-                : Math.Abs(values.Skip(midpoint).Average() - values.Take(midpoint).Average()) < 10m
+                : Math.Abs(values.Skip(midpoint).Average() - values.Take(midpoint).Average()) < GlucoseRules.TrendStabilityDeltaMgDl
                     ? TrendType.Stable.ToString()
                     : values.Skip(midpoint).Average() > values.Take(midpoint).Average() ? TrendType.Worsening.ToString() : TrendType.Improving.ToString();
 
@@ -84,7 +84,7 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
                 patient.PatientId,
                 patient.PatientName,
                 last.MeasurementDateTime,
-                Math.Round(last.Unit == GlucoseUnit.MmolL ? last.GlucoseValue * 18m : last.GlucoseValue, 2),
+                Math.Round(GlucoseValueConverter.ToMgDl(last.GlucoseValue, last.Unit), 2),
                 Math.Round(values.Average(), 2),
                 Math.Round(inRange, 2),
                 trend,
