@@ -31,7 +31,7 @@ public sealed class DoctorPatientAlertsService(DiabetesDbContext db) : IDoctorPa
             .OrderByDescending(x => x.CreatedAt)
             .Take(200)
             .Select(x => new DoctorPatientAlertResponse(
-                x.Id, x.Type, x.Severity, x.Title, x.Message, x.CreatedAt, x.IsRead))
+                x.Id, x.AlertType, x.Severity, x.AlertType.ToString(), x.Message, x.CreatedAt, x.IsRead))
             .ToListAsync(cancellationToken);
     }
 }
