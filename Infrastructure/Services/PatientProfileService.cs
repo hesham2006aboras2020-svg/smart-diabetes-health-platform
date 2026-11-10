@@ -3,13 +3,11 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
 public sealed class PatientProfileService(
-    UserManager<User> userManager,
     DiabetesDbContext db) : IPatientProfileService
 {
     public async Task<PatientProfileResponse> GetAsync(
