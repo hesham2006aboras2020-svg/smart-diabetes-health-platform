@@ -24,7 +24,7 @@ public sealed class AlertsController(IAlertService service) : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("/api/alerts/analyze-patterns")]
+    [HttpPost("analyze-patterns")]
     public async Task<ActionResult<int>> AnalyzePatterns(
         [FromQuery] int days = 7,
         CancellationToken cancellationToken = default)
