@@ -4,7 +4,7 @@ public sealed record DoctorPatientDetailsResponse(
     Guid PatientId,
     string PatientName,
     string Email,
-    DateTime? DateOfBirth,
+    DateOnly? DateOfBirth,
     string? Gender,
     DateTime? LastReadingAt,
     decimal? LastReadingMgDl,
