@@ -26,6 +26,9 @@ public sealed class AuthService(
         if (!Enum.TryParse<Role>(request.Role, true, out var role) || role == Role.Admin)
             throw new InvalidOperationException("Only Patient and Doctor registration is allowed.");
 
+        if (role == Role.Doctor && string.IsNullOrWhiteSpace(request.LicenseNumber))
+            throw new InvalidOperationException("Doctor license number is required.");
+
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -47,9 +50,6 @@ public sealed class AuthService(
         }
         else
         {
-            if (string.IsNullOrWhiteSpace(request.LicenseNumber))
-                throw new InvalidOperationException("Doctor license number is required.");
-
             var doctor = new Doctor
             {
                 Id = Guid.NewGuid(),
