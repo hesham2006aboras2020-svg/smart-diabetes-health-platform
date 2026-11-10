@@ -104,6 +104,30 @@ public sealed class AuthService(
         return await BuildResponseAsync(user);
     }
 
+    public async Task<AuthResponse> RefreshAsync(
+        RefreshTokenRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(request.RefreshToken))
+            throw new ArgumentException("Refresh token is required.");
+
+        var refreshToken = request.RefreshToken.Trim();
+        var storedToken = await db.RefreshTokens
+            .Include(x => x.User)
+            .SingleOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
+
+        if (storedToken is null || storedToken.RevokedAt.HasValue || storedToken.ExpiresAt <= DateTime.UtcNow)
+            throw new UnauthorizedAccessException("Refresh token is invalid or expired.");
+
+        if (storedToken.User.AccountStatus != AccountStatus.Active)
+            throw new UnauthorizedAccessException("This account is not active.");
+
+        storedToken.RevokedAt = DateTime.UtcNow;
+        await db.SaveChangesAsync(cancellationToken);
+
+        return await BuildResponseAsync(storedToken.User);
+    }
+
     private async Task<AuthResponse> BuildResponseAsync(User user)
     {
         var email = user.Email ?? throw new InvalidOperationException("User email is required to issue a token.");
