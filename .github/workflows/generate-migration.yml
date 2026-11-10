@@ -1,0 +1,33 @@
+name: Generate EF Migration
+
+on:
+  push:
+    branches:
+      - feature/initial-ef-migration
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Install EF CLI
+        run: dotnet tool install --global dotnet-ef --version 10.0.14
+      - name: Restore
+        run: dotnet restore DiabetesPlatform.sln
+      - name: Generate migration
+        run: |
+          dotnet ef migrations add InitialIdentityAndDomain \
+            --project Infrastructure \
+            --startup-project API \
+            --output-dir Data/Migrations
+      - name: Print generated migration files
+        run: |
+          for file in Infrastructure/Data/Migrations/*.cs; do
+            echo "===== FILE: $file ====="
+            cat "$file"
+          done
