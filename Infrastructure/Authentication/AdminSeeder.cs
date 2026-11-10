@@ -13,6 +13,7 @@ public sealed class AdminSeeder(
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
         var username = configuration["AdminSeed:Username"]?.Trim();
+        var username = configuration["AdminSeed:Username"]?.Trim();
         var email = configuration["AdminSeed:Email"]?.Trim().ToLowerInvariant();
         var password = configuration["AdminSeed:Password"];
         var fullName = configuration["AdminSeed:FullName"]?.Trim();
