@@ -19,7 +19,6 @@ public sealed class NotificationService(DiabetesDbContext db) : INotificationSer
 
         return await query
             .OrderByDescending(x => x.SentAt ?? DateTime.MinValue)
-            .ThenByDescending(x => x.Id)
             .Take(200)
             .Select(x => new NotificationResponse(
                 x.Id,
@@ -29,8 +28,7 @@ public sealed class NotificationService(DiabetesDbContext db) : INotificationSer
                 x.Type,
                 x.ReadAt != null,
                 x.IsSent,
-                x.SentAt,
-                x.Alert != null ? x.Alert.CreatedAt : DateTime.MinValue))
+                x.SentAt))
             .ToListAsync(cancellationToken);
     }
 
