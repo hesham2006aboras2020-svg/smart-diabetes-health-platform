@@ -29,7 +29,7 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
             .Select(x => new { x.GlucoseValue, x.Unit })
             .ToListAsync(cancellationToken);
 
-        var values = readings.Select(x => x.Unit == GlucoseUnit.MmolL ? x.GlucoseValue * 18m : x.GlucoseValue).ToList();
+        var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
 
         var report = new Domain.Entities.HealthReport
         {
