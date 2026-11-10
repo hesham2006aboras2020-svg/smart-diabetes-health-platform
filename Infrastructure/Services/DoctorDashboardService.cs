@@ -1,0 +1,103 @@
+using Application.DTOs.DoctorDashboard;
+using Application.Interfaces;
+using Domain.Enums;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+
+namespace Infrastructure.Services;
+
+public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashboardService
+{
+    public async Task<IReadOnlyList<DoctorPatientDashboardResponse>> GetPatientsAsync(
+        Guid doctorUserId, CancellationToken cancellationToken)
+    {
+        var doctor = await db.Doctors
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.UserId == doctorUserId && x.User.AccountStatus == AccountStatus.Active, cancellationToken);
+
+        if (doctor is null)
+            throw new UnauthorizedAccessException("حساب الطبيب غير نشط أو غير موجود.");
+
+        var patients = await db.DoctorPatientRelationships
+            .AsNoTracking()
+            .Where(x => x.DoctorId == doctor.Id && x.Status == RelationshipStatus.Active)
+            .Select(x => new
+            {
+                x.PatientId,
+                PatientName = x.Patient.User.FullName
+            })
+            .ToListAsync(cancellationToken);
+
+        var result = new List<DoctorPatientDashboardResponse>();
+
+        foreach (var patient in patients)
+        {
+            var readings = await db.GlucoseReadings
+                .AsNoTracking()
+                .Where(x => x.PatientId == patient.PatientId &&
+                            x.MeasurementDateTime >= DateTime.UtcNow.AddDays(-7))
+                .OrderBy(x => x.MeasurementDateTime)
+                .Select(x => new { x.GlucoseValue, x.Unit, x.MeasurementDateTime })
+                .ToListAsync(cancellationToken);
+
+            var alerts = await db.Alerts
+                .AsNoTracking()
+                .CountAsync(x => x.PatientId == patient.PatientId && !x.IsRead, cancellationToken);
+
+            if (readings.Count == 0)
+            {
+                result.Add(new DoctorPatientDashboardResponse(
+                    patient.PatientId, patient.PatientName, null, null, null, null,
+                    "InsufficientData", null, "InsufficientData", "LowData", alerts));
+                continue;
+            }
+
+            var values = readings.Select(x => x.Unit == GlucoseUnit.MmolL ? x.GlucoseValue * 18m : x.GlucoseValue).ToList();
+            var inRange = values.Count(x => x is >= 70m and <= 180m) * 100m / values.Count;
+            var high = values.Count(x => x > 180m) * 100m / values.Count;
+            var low = values.Count(x => x < 70m) * 100m / values.Count;
+
+            var midpoint = values.Count / 2;
+            var trend = values.Count < 4
+                ? "InsufficientData"
+                : Math.Abs(values.Skip(midpoint).Average() - values.Take(midpoint).Average()) < 10m
+                    ? "Stable"
+                    : values.Skip(midpoint).Average() > values.Take(midpoint).Average() ? "Rising" : "Falling";
+
+            var penalty = Math.Min(40m, (high + low) * 0.8m);
+            var trendPenalty = trend == "Rising" ? 10m : trend == "Falling" ? 5m : 0m;
+            var score = Math.Clamp(inRange - penalty + (values.Count >= 7 ? 10m : values.Count / 7m * 10m) - trendPenalty, 0m, 100m);
+            var level = score >= 80m ? "Good" : score >= 60m ? "Moderate" : "NeedsFollowUp";
+
+            var priority = values.Count < 7
+                ? "LowData"
+                : low >= 15m || high >= 30m
+                    ? "High"
+                    : low >= 10m || high >= 20m || trend == "Rising"
+                        ? "Medium"
+                        : "Normal";
+
+            var last = readings[^1];
+
+            result.Add(new DoctorPatientDashboardResponse(
+                patient.PatientId,
+                patient.PatientName,
+                last.MeasurementDateTime,
+                Math.Round(last.Unit == GlucoseUnit.MmolL ? last.GlucoseValue * 18m : last.GlucoseValue, 2),
+                Math.Round(values.Average(), 2),
+                Math.Round(inRange, 2),
+                trend,
+                Math.Round(score, 2),
+                level,
+                priority,
+                alerts));
+        }
+
+        return result
+            .OrderByDescending(x => x.FollowUpPriority == "High")
+            .ThenByDescending(x => x.FollowUpPriority == "Medium")
+            .ThenByDescending(x => x.UnreadAlertCount)
+            .ThenBy(x => x.PatientName)
+            .ToList();
+    }
+}
