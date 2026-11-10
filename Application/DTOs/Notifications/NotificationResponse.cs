@@ -10,4 +10,5 @@ public sealed record NotificationResponse(
     NotificationType Type,
     bool IsRead,
     bool IsSent,
-    DateTime? SentAt);
+    DateTime? SentAt,
+    DateTime CreatedAt);
