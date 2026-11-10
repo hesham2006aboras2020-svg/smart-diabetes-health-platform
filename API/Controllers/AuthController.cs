@@ -33,4 +33,23 @@ public class AuthController(IAuthService authService) : ControllerBase
             return Unauthorized(new { message = ex.Message });
         }
     }
+
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh(
+        RefreshTokenRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await authService.RefreshAsync(request, cancellationToken));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+    }
 }
