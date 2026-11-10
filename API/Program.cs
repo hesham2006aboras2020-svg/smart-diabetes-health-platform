@@ -37,6 +37,12 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var adminSeeder = scope.ServiceProvider.GetRequiredService<AdminSeeder>();
+    await adminSeeder.SeedAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
