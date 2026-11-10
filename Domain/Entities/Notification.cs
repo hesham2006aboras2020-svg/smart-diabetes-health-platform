@@ -11,6 +11,7 @@ public class Notification
     public bool IsSent { get; set; }
     public DateTime? SentAt { get; set; }
     public DateTime? ReadAt { get; set; }
+    public DateTime CreatedAt { get; set; }
     public User User { get; set; } = null!;
     public Alert? Alert { get; set; }
 }
