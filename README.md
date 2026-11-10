@@ -56,3 +56,10 @@ DiabetesPlatform/
 
 ## حالة التنفيذ
 هذا الفرع مخصص لتأسيس المعمارية النهائية قبل بدء تنفيذ الميزات. سيتم تنفيذ قاعدة البيانات، Identity/JWT، APIs، ثم Flutter Patient/Doctor UI بشكل تدريجي مع الاختبارات.
+
+
+## Database Foundation
+
+This branch adds the first backend/domain foundation: ASP.NET Core Web API, .NET 10, EF Core 10, SQL Server configuration, domain entities/enums, and EF Core relationship mappings. The doctor approval workflow is modeled with `AccountStatus` and `DoctorApprovalRequest`, and doctor-patient access is represented explicitly through `DoctorPatientRelationship`.
+
+Next: validate locally, add ASP.NET Core Identity + JWT, then create the initial EF Core migration and SQL Server database.
