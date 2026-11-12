@@ -1,6 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/doctor_repository.dart';
 import 'doctor_dashboard_page.dart';
 
 class DoctorPatientPage extends ConsumerWidget {
