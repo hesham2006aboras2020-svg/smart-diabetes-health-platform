@@ -170,6 +170,50 @@ public sealed class MedicationService(DiabetesDbContext dbContext) : IMedication
         return logs.Select(MapLog).ToList();
     }
 
+    public async Task<MedicationAdherenceSummaryResponse> GetAdherenceSummaryAsync(
+        Guid userId,
+        int days,
+        CancellationToken cancellationToken = default)
+    {
+        if (days is < 1 or > 90)
+            throw new ArgumentException("الفترة يجب أن تكون بين يوم واحد و90 يومًا.");
+
+        var to = DateTime.UtcNow;
+        var from = to.AddDays(-days);
+
+        var logs = await dbContext.MedicationLogs
+            .AsNoTracking()
+            .Where(x =>
+                x.Medication.Patient.UserId == userId &&
+                x.ScheduledTime >= from &&
+                x.ScheduledTime <= to)
+            .ToListAsync(cancellationToken);
+
+        var total = logs.Count;
+        var taken = logs.Count(x => x.Status == Domain.Enums.MedicationLogStatus.Taken);
+        var missed = logs.Count(x => x.Status == Domain.Enums.MedicationLogStatus.Missed);
+        var skipped = logs.Count(x => x.Status == Domain.Enums.MedicationLogStatus.Skipped);
+
+        var adherence = total == 0 ? 0m : Math.Round(taken * 100m / total, 2);
+
+        var activeMedicationCount = await dbContext.Medications
+            .AsNoTracking()
+            .CountAsync(
+                x => x.Patient.UserId == userId && x.IsActive,
+                cancellationToken);
+
+        return new MedicationAdherenceSummaryResponse(
+            days,
+            total,
+            taken,
+            missed,
+            skipped,
+            adherence,
+            activeMedicationCount,
+            from,
+            to);
+    }
+
     private async Task<Medication> GetOwnedMedicationAsync(
         Guid userId,
         Guid medicationId,
