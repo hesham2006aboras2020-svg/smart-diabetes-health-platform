@@ -3,8 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/glucose_repository.dart';
 import '../data/glucose_models.dart';
+import '../../home/presentation/patient_dashboard_controller.dart';
 
-final glucoseHistoryDaysProvider = StateProvider<int>((ref) => 7);
+final _glucoseHistoryDaysProvider = NotifierProvider<_GlucoseHistoryDays, int>(_GlucoseHistoryDays.new);
+
+class _GlucoseHistoryDays extends Notifier<int> {
+  @override
+  int build() => 7;
+}
+
 final glucoseHistoryProvider =
     FutureProvider.autoDispose.family<List<GlucoseReading>, int>(
   (ref, days) => ref.watch(glucoseRepositoryProvider).getRecentReadings(days: days),
@@ -15,7 +22,7 @@ class GlucoseHistoryPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final days = ref.watch(glucoseHistoryDaysProvider);
+    final days = ref.watch(_glucoseHistoryDaysProvider);
     final readings = ref.watch(glucoseHistoryProvider(days));
 
     return Scaffold(
@@ -32,7 +39,7 @@ class GlucoseHistoryPage extends ConsumerWidget {
               ],
               selected: {days},
               onSelectionChanged: (selected) {
-                ref.read(glucoseHistoryDaysProvider.notifier).state = selected.first;
+                ref.read(_glucoseHistoryDaysProvider.notifier).state = selected.first;
               },
             ),
           ),
