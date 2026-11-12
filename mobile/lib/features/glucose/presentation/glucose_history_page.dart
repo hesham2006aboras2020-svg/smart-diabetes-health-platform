@@ -20,7 +20,7 @@ class _GlucoseHistoryPageState extends ConsumerState<GlucoseHistoryPage> {
   int _days = 7;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final days = _days;
     final readings = ref.watch(glucoseHistoryProvider(days));
 
