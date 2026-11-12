@@ -28,7 +28,7 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: role == 'Patient'
-          ? ListView(padding: const EdgeInsets.all(20), children: [const SizedBox(height: 8), const SizedBox(height: 420, child: PatientDashboardPage()), const SizedBox(height: 12), _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير الصحية', page: const HealthReportsPage())])
+          ? Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage())]))])
           : const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
