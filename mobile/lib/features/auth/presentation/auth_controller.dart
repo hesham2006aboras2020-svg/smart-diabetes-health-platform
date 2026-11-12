@@ -7,11 +7,11 @@ import '../../../core/network/api_client.dart';
 import '../data/auth_models.dart';
 import '../data/auth_repository.dart';
 
-enum AuthStatus { signedOut, loading, authenticated, error }
+enum AuthStatus { loading, signedOut, authenticated, error }
 
 class AuthState {
   const AuthState({
-    this.status = AuthStatus.signedOut,
+    this.status = AuthStatus.loading,
     this.role,
     this.message,
   });
@@ -25,11 +25,18 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
   (ref) => FlutterSecureStorage(),
 );
 
+final sessionManagerProvider = Provider<SessionManager>((ref) {
+  return SessionManager(
+    ref.watch(secureStorageProvider),
+    baseUrl: AppConfig.apiBaseUrl,
+  );
+});
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  final storage = ref.watch(secureStorageProvider);
+  final session = ref.watch(sessionManagerProvider);
   final client = ApiClient(
     baseUrl: AppConfig.apiBaseUrl,
-    tokenProvider: () => storage.read(key: 'access_token'),
+    sessionManager: session,
   );
   return AuthRepository(client);
 });
@@ -38,14 +45,40 @@ final authControllerProvider =
     NotifierProvider<AuthController, AuthState>(AuthController.new);
 
 class AuthController extends Notifier<AuthState> {
-  late final FlutterSecureStorage _storage;
+  late final SessionManager _session;
   late final AuthRepository _repository;
+  bool _restoreStarted = false;
 
   @override
   AuthState build() {
-    _storage = ref.watch(secureStorageProvider);
+    _session = ref.watch(sessionManagerProvider);
     _repository = ref.watch(authRepositoryProvider);
+    _repository.setSessionExpiredHandler(markSignedOut);
+
+    if (!_restoreStarted) {
+      _restoreStarted = true;
+      Future<void>.microtask(_restoreSession);
+    }
+
     return const AuthState();
+  }
+
+  Future<void> _restoreSession() async {
+    try {
+      final response = await _session.restore();
+      if (response == null) {
+        state = const AuthState(status: AuthStatus.signedOut);
+        return;
+      }
+
+      state = AuthState(
+        status: AuthStatus.authenticated,
+        role: response.role,
+      );
+    } catch (_) {
+      await _session.clear();
+      state = const AuthState(status: AuthStatus.signedOut);
+    }
   }
 
   Future<void> login(String username, String password) async {
@@ -55,7 +88,7 @@ class AuthController extends Notifier<AuthState> {
         username: username.trim(),
         password: password,
       );
-      await _saveSession(response);
+      await _session.save(response);
       state = AuthState(
         status: AuthStatus.authenticated,
         role: response.role,
@@ -89,13 +122,16 @@ class AuthController extends Notifier<AuthState> {
         clinicName: clinicName,
       );
       if (response.authentication != null) {
-        await _saveSession(response.authentication!);
+        await _session.save(response.authentication!);
         state = AuthState(
           status: AuthStatus.authenticated,
           role: response.authentication!.role,
         );
       } else {
-        state = AuthState(message: response.message);
+        state = AuthState(
+          status: AuthStatus.signedOut,
+          message: response.message,
+        );
       }
       return response;
     } catch (error) {
@@ -108,21 +144,18 @@ class AuthController extends Notifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _storage.delete(key: 'access_token');
-    await _storage.delete(key: 'refresh_token');
-    await _storage.delete(key: 'access_token_expires_at');
-    await _storage.delete(key: 'role');
+    await _session.clear();
     state = const AuthState(status: AuthStatus.signedOut);
   }
 
-  Future<void> _saveSession(AuthResponse response) async {
-    await _storage.write(key: 'access_token', value: response.accessToken);
-    await _storage.write(key: 'refresh_token', value: response.refreshToken);
-    await _storage.write(
-      key: 'access_token_expires_at',
-      value: response.accessTokenExpiresAt.toIso8601String(),
-    );
-    await _storage.write(key: 'role', value: response.role);
+  Future<void> markSignedOut() async {
+    await _session.clear();
+    if (state.status != AuthStatus.signedOut) {
+      state = const AuthState(
+        status: AuthStatus.signedOut,
+        message: 'انتهت الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+      );
+    }
   }
 
   String _messageFromError(Object error) {
