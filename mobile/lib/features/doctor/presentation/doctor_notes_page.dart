@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/presentation/auth_controller.dart';
 class DoctorNotesPage extends ConsumerStatefulWidget{
- const DoctorNotesPage({super.key,required this.patientId});
+ const DoctorNotesPage(this.patientId,{super.key});
  final String patientId;
  @override ConsumerState<DoctorNotesPage> createState()=>_DoctorNotesState();
 }
