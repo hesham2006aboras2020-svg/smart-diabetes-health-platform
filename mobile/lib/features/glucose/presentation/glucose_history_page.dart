@@ -1,28 +1,26 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../data/glucose_repository.dart';
 import '../data/glucose_models.dart';
-import '../../home/presentation/patient_dashboard_controller.dart';
-
-final _glucoseHistoryDaysProvider = NotifierProvider<_GlucoseHistoryDays, int>(_GlucoseHistoryDays.new);
-
-class _GlucoseHistoryDays extends Notifier<int> {
-  @override
-  int build() => 7;
-}
 
 final glucoseHistoryProvider =
     FutureProvider.autoDispose.family<List<GlucoseReading>, int>(
   (ref, days) => ref.watch(glucoseRepositoryProvider).getRecentReadings(days: days),
 );
 
-class GlucoseHistoryPage extends ConsumerWidget {
+class GlucoseHistoryPage extends ConsumerStatefulWidget {
   const GlucoseHistoryPage({super.key});
 
   @override
+  ConsumerState<GlucoseHistoryPage> createState() => _GlucoseHistoryPageState();
+}
+
+class _GlucoseHistoryPageState extends ConsumerState<GlucoseHistoryPage> {
+  int _days = 7;
+
+  @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final days = ref.watch(_glucoseHistoryDaysProvider);
+    final days = _days;
     final readings = ref.watch(glucoseHistoryProvider(days));
 
     return Scaffold(
@@ -39,14 +37,14 @@ class GlucoseHistoryPage extends ConsumerWidget {
               ],
               selected: {days},
               onSelectionChanged: (selected) {
-                ref.read(_glucoseHistoryDaysProvider.notifier).state = selected.first;
+                setState(() => _days = selected.first);
               },
             ),
           ),
           Expanded(
             child: readings.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => Center(
+              error: (_, _) => Center(
                 child: FilledButton(
                   onPressed: () => ref.invalidate(glucoseHistoryProvider(days)),
                   child: const Text('إعادة المحاولة'),
@@ -61,7 +59,7 @@ class GlucoseHistoryPage extends ConsumerWidget {
                       child: ListView.separated(
                         padding: const EdgeInsets.all(20),
                         itemCount: items.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
+                        separatorBuilder: (_, _) => const SizedBox(height: 8),
                         itemBuilder: (_, index) => _ReadingCard(items[index]),
                       ),
                     ),
