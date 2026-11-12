@@ -22,7 +22,7 @@ class AuthState {
 }
 
 final secureStorageProvider = Provider<FlutterSecureStorage>(
-  (ref) => const FlutterSecureStorage(),
+  (ref) => FlutterSecureStorage(),
 );
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
