@@ -43,4 +43,8 @@ class AuthRepository {
     );
     return RegisterResponse.fromJson(response.data!);
   }
+
+  void setSessionExpiredHandler(Future<void> Function() handler) {
+    _client.onSessionExpired = handler;
+  }
 }
