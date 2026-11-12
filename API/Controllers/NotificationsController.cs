@@ -26,6 +26,14 @@ public sealed class NotificationsController(INotificationService service) : Cont
         return NoContent();
     }
 
+    [HttpPost("read-all")]
+    public async Task<IActionResult> MarkAllAsRead(
+        CancellationToken cancellationToken = default)
+    {
+        await service.MarkAllAsReadAsync(GetUserId(), cancellationToken);
+        return NoContent();
+    }
+
     [HttpPost("device-token")]
     public async Task<IActionResult> RegisterDeviceToken(
         RegisterDeviceTokenRequest request,
