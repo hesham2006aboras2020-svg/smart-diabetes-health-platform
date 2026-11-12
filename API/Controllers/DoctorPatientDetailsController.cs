@@ -16,6 +16,11 @@ public sealed class DoctorPatientDetailsController(IDoctorPatientDetailsService 
         Guid patientId, CancellationToken cancellationToken = default)
         => Ok(await service.GetDetailsAsync(GetUserId(), patientId, cancellationToken));
 
+    [HttpGet("{patientId:guid}/medication-adherence")]
+    public async Task<ActionResult<DoctorPatientMedicationAdherenceResponse>> GetMedicationAdherence(
+        Guid patientId, [FromQuery] int days = 7, CancellationToken cancellationToken = default)
+        => Ok(await service.GetMedicationAdherenceAsync(GetUserId(), patientId, days, cancellationToken));
+
     [HttpGet("{patientId:guid}/readings")]
     public async Task<ActionResult<IReadOnlyList<DoctorPatientReadingResponse>>> GetReadings(
         Guid patientId, [FromQuery] int days = 7, CancellationToken cancellationToken = default)
