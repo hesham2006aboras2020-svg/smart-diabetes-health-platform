@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseService
+public sealed class GlucoseService(DiabetesDbContext dbContext, IPushNotificationService pushNotificationService) : IGlucoseService
 {
     public async Task<GlucoseReadingResponse> AddReadingAsync(
         Guid userId,
@@ -40,6 +40,8 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
 
         dbContext.GlucoseReadings.Add(reading);
 
+        Notification? pushNotification = null;
+
         if (status != "Normal")
         {
             var alert = new Alert
@@ -57,7 +59,7 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
             };
 
             dbContext.Alerts.Add(alert);
-            dbContext.Notifications.Add(new Notification
+            pushNotification = new Notification
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
@@ -68,10 +70,34 @@ public sealed class GlucoseService(DiabetesDbContext dbContext) : IGlucoseServic
                 IsSent = false,
                 SentAt = null,
                 CreatedAt = DateTime.UtcNow
-            });
+            };
+
+            dbContext.Notifications.Add(pushNotification);
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
+
+        if (pushNotification is not null)
+        {
+            var sent = await pushNotificationService.SendToUserAsync(
+                userId,
+                pushNotification.Title,
+                pushNotification.Body,
+                new Dictionary<string, string>
+                {
+                    ["type"] = pushNotification.Type.ToString(),
+                    ["notificationId"] = pushNotification.Id.ToString(),
+                    ["alertId"] = pushNotification.AlertId?.ToString() ?? string.Empty
+                },
+                cancellationToken);
+
+            if (sent > 0)
+            {
+                pushNotification.IsSent = true;
+                pushNotification.SentAt = DateTime.UtcNow;
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+        }
 
         return Map(reading, status);
     }
