@@ -23,16 +23,22 @@ class AuthRepository {
     required String password,
     required String role,
     String? licenseNumber,
+    String? specialization,
+    String? clinicName,
   }) async {
     final response = await _client.dio.post<Map<String, dynamic>>(
       '/api/auth/register',
       data: {
-        'fullName': fullName,
-        'email': email,
+        'fullName': fullName.trim(),
+        'email': email.trim(),
         'password': password,
         'role': role,
-        if (licenseNumber != null && licenseNumber.isNotEmpty)
-          'licenseNumber': licenseNumber,
+        if (licenseNumber != null && licenseNumber.trim().isNotEmpty)
+          'licenseNumber': licenseNumber.trim(),
+        if (specialization != null && specialization.trim().isNotEmpty)
+          'specialization': specialization.trim(),
+        if (clinicName != null && clinicName.trim().isNotEmpty)
+          'clinicName': clinicName.trim(),
       },
     );
     return RegisterResponse.fromJson(response.data!);
