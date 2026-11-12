@@ -8,6 +8,7 @@ import '../../notifications/presentation/notifications_page.dart';
 import '../../profile/presentation/profile_page.dart';
 import '../../health_reports/presentation/health_reports_page.dart';
 import '../../glucose/presentation/glucose_analytics_page.dart';
+import '../../doctor/presentation/doctor_dashboard_page.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -29,7 +30,7 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: role == 'Patient'
-          ? Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage()), _ActionButton(icon: Icons.show_chart, label: 'التحليل', page: const GlucoseAnalyticsPage())]))])
+          ? role == 'Doctor' ? const DoctorDashboardPage() : Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage()), _ActionButton(icon: Icons.show_chart, label: 'التحليل', page: const GlucoseAnalyticsPage())]))])
           : const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
