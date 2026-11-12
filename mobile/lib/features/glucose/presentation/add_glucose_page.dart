@@ -97,7 +97,7 @@ class _AddGlucosePageState extends ConsumerState<AddGlucosePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _unit,
+              initialValue: _unit,
               decoration: const InputDecoration(
                 labelText: 'وحدة القياس',
                 border: OutlineInputBorder(),
@@ -112,7 +112,7 @@ class _AddGlucosePageState extends ConsumerState<AddGlucosePage> {
             ),
             const SizedBox(height: 16),
             DropdownButtonFormField<String>(
-              value: _context,
+              initialValue: _context,
               decoration: const InputDecoration(
                 labelText: 'سياق القياس',
                 border: OutlineInputBorder(),
