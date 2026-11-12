@@ -18,7 +18,6 @@ class MedicationsPage extends ConsumerWidget{
       if(items.isEmpty){return const Card(child:Padding(padding:EdgeInsets.all(20),child:Text('لا توجد أدوية مضافة حتى الآن.')));}
       return Column(children:[for(final m in items) Card(child:ListTile(
        title:Text(m.name),
-       subtitle:Text([m.dosage,m.instructions].whereType<String>().where((s)=>s.isNotEmpty).join(' • ')),
        subtitle:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text([m.dosage,m.instructions].whereType<String>().where((s)=>s.isNotEmpty).join(' • ')),MedicationActions(medicationId:m.id)]),trailing:Switch(value:m.isActive,onChanged:(v)async{await ref.read(medicationRepositoryProvider).setStatus(m.id,v);ref.invalidate(medicationsProvider);}),
       ))]);
     }),
