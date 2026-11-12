@@ -68,6 +68,45 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
+  Future<RegisterResponse?> register({
+    required String fullName,
+    required String email,
+    required String password,
+    required String role,
+    String? licenseNumber,
+    String? specialization,
+    String? clinicName,
+  }) async {
+    state = const AuthState(status: AuthStatus.loading);
+    try {
+      final response = await _repository.register(
+        fullName: fullName,
+        email: email,
+        password: password,
+        role: role,
+        licenseNumber: licenseNumber,
+        specialization: specialization,
+        clinicName: clinicName,
+      );
+      if (response.authentication != null) {
+        await _saveSession(response.authentication!);
+        state = AuthState(
+          status: AuthStatus.authenticated,
+          role: response.authentication!.role,
+        );
+      } else {
+        state = AuthState(message: response.message);
+      }
+      return response;
+    } catch (error) {
+      state = AuthState(
+        status: AuthStatus.error,
+        message: _messageFromError(error),
+      );
+      return null;
+    }
+  }
+
   Future<void> logout() async {
     await _storage.delete(key: 'access_token');
     await _storage.delete(key: 'refresh_token');

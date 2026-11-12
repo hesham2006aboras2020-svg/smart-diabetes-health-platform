@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'auth_controller.dart';
 
@@ -89,6 +90,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             )
                           : const Text('تسجيل الدخول'),
                     ),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed:
+                        loading ? null : () => context.push('/register'),
+                    child: const Text('ليس لديك حساب؟ إنشاء حساب'),
                   ),
                 ],
               ),

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'features/auth/presentation/auth_controller.dart';
 import 'features/auth/presentation/login_page.dart';
+import 'features/auth/presentation/register_page.dart';
 import 'features/home/presentation/home_page.dart';
 
 class DiabetesApp extends ConsumerWidget {
@@ -16,12 +17,14 @@ class DiabetesApp extends ConsumerWidget {
     final router = GoRouter(
       initialLocation: '/login',
       redirect: (context, state) {
-        final isLogin = state.matchedLocation == '/login';
+        final isAuthRoute =
+            state.matchedLocation == '/login' ||
+            state.matchedLocation == '/register';
         if (auth.status == AuthStatus.loading) return null;
-        if (auth.status == AuthStatus.authenticated && isLogin) {
+        if (auth.status == AuthStatus.authenticated && isAuthRoute) {
           return '/home';
         }
-        if (auth.status != AuthStatus.authenticated && !isLogin) {
+        if (auth.status != AuthStatus.authenticated && !isAuthRoute) {
           return '/login';
         }
         return null;
@@ -30,6 +33,10 @@ class DiabetesApp extends ConsumerWidget {
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginPage(),
+        ),
+        GoRoute(
+          path: '/register',
+          builder: (context, state) => const RegisterPage(),
         ),
         GoRoute(
           path: '/home',
