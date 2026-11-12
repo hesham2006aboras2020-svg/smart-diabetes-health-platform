@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/glucose_models.dart';
+import '../../home/presentation/patient_dashboard_controller.dart';
 
 final glucoseHistoryProvider =
     FutureProvider.autoDispose.family<List<GlucoseReading>, int>(
