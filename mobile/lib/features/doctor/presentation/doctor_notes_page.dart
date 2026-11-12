@@ -20,7 +20,7 @@ class _DoctorNotesState extends ConsumerState<DoctorNotesPage>{
   if(note.text.trim().isEmpty)return;
   setState(()=>saving=true);
   try{
-   await ref.read(apiClientProvider).dio.post('/api/doctor-notes',data:{'patientId':patientId,'note':note.text.trim()});
+   await ref.read(apiClientProvider).dio.post('/api/doctor-notes',data:{'patientId':widget.patientId,'note':note.text.trim()});
    note.clear();
    if(context.mounted)ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text('تم حفظ الملاحظة.')));
   }finally{if(mounted)setState(()=>saving=false);}
