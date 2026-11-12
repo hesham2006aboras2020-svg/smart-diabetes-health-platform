@@ -1,6 +1,7 @@
 using Infrastructure.Authentication;
 using Infrastructure.Data;
 using Infrastructure.Services;
+using Infrastructure.Notifications;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +29,7 @@ public static class DependencyInjection
         services.AddScoped<Application.Interfaces.IDoctorDashboardService, DoctorDashboardService>();
         services.AddScoped<Application.Interfaces.IHealthReportService, HealthReportService>();
         services.AddScoped<Application.Interfaces.INotificationService, NotificationService>();
+        services.AddScoped<Application.Interfaces.IPushNotificationService, FirebasePushNotificationService>();
         services.AddScoped<Application.Interfaces.IAdminDashboardService, AdminDashboardService>();
         services.AddScoped<Application.Interfaces.IDoctorPatientDetailsService, DoctorPatientDetailsService>();
         services.AddScoped<Application.Interfaces.IDoctorPatientAlertsService, DoctorPatientAlertsService>();
