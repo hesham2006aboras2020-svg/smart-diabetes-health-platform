@@ -32,7 +32,11 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: role == 'Patient'
-          ? role == 'Doctor' ? const DoctorDashboardPage() : role == 'Admin' ? const AdminDashboardPage() : Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage()), _ActionButton(icon: Icons.show_chart, label: 'التحليل', page: const GlucoseAnalyticsPage()), _ActionButton(icon: Icons.warning_amber_outlined, label: 'التنبيهات', page: const AlertsPage())]))])
+          ? Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage()), _ActionButton(icon: Icons.show_chart, label: 'التحليل', page: const GlucoseAnalyticsPage()), _ActionButton(icon: Icons.warning_amber_outlined, label: 'التنبيهات', page: const AlertsPage())]))])
+          : role == 'Doctor'
+          ? const DoctorDashboardPage()
+          : role == 'Admin'
+          ? const AdminDashboardPage()
           : const Center(
               child: Padding(
                 padding: EdgeInsets.all(24),
