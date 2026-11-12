@@ -48,6 +48,18 @@ public sealed class NotificationService(DiabetesDbContext db) : INotificationSer
         await db.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task MarkAllAsReadAsync(
+        Guid userId, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+
+        await db.Notifications
+            .Where(x => x.UserId == userId && x.ReadAt == null)
+            .ExecuteUpdateAsync(
+                setters => setters.SetProperty(x => x.ReadAt, now),
+                cancellationToken);
+    }
+
     public async Task RegisterDeviceTokenAsync(
         Guid userId,
         RegisterDeviceTokenRequest request,
