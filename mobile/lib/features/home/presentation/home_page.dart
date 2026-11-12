@@ -11,6 +11,7 @@ import '../../glucose/presentation/glucose_analytics_page.dart';
 import '../../doctor/presentation/doctor_dashboard_page.dart';
 import '../../admin/presentation/admin_dashboard_page.dart';
 import '../../alerts/presentation/alerts_page.dart';
+import '../../patient_doctors/presentation/patient_doctors_page.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -32,7 +33,7 @@ class HomePage extends ConsumerWidget {
         ],
       ),
       body: role == 'Patient'
-          ? Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage()), _ActionButton(icon: Icons.show_chart, label: 'التحليل', page: const GlucoseAnalyticsPage()), _ActionButton(icon: Icons.warning_amber_outlined, label: 'التنبيهات', page: const AlertsPage())]))])
+          ? Column(children: [const Expanded(child: PatientDashboardPage()), SingleChildScrollView(scrollDirection: Axis.horizontal, padding: const EdgeInsets.all(12), child: Row(children: [ _ActionButton(icon: Icons.medication_outlined, label: 'الأدوية', page: const MedicationsPage()), _ActionButton(icon: Icons.notifications_outlined, label: 'الإشعارات', page: const NotificationsPage()), _ActionButton(icon: Icons.person_outline, label: 'الملف الشخصي', page: const ProfilePage()), _ActionButton(icon: Icons.assessment_outlined, label: 'التقارير', page: const HealthReportsPage()), _ActionButton(icon: Icons.show_chart, label: 'التحليل', page: const GlucoseAnalyticsPage()), _ActionButton(icon: Icons.warning_amber_outlined, label: 'التنبيهات', page: const AlertsPage()), _ActionButton(icon: Icons.medical_services_outlined, label: 'أطبائي', page: const PatientDoctorsPage())]))])
           : role == 'Doctor'
           ? const DoctorDashboardPage()
           : role == 'Admin'
