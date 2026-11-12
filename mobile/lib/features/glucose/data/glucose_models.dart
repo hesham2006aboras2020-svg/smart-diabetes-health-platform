@@ -45,10 +45,13 @@ class GlucoseReading {
   factory GlucoseReading.fromJson(Map<String, dynamic> json) {
     return GlucoseReading(
       glucoseValue: (json['glucoseValue'] as num).toDouble(),
-      unit: json['unit'] as String,
+      unit: _enumName(json['unit'], const ['MgDl', 'MmolL']),
       measurementDateTime:
           DateTime.parse(json['measurementDateTime'] as String).toLocal(),
-      measurementContext: json['measurementContext'] as String,
+      measurementContext: _enumName(
+        json['measurementContext'],
+        const ['Fasting', 'BeforeMeal', 'AfterMeal', 'BeforeSleep', 'Random', 'Other'],
+      ),
       status: json['status'] as String,
     );
   }
@@ -58,4 +61,12 @@ class GlucoseReading {
   final DateTime measurementDateTime;
   final String measurementContext;
   final String status;
+
+  static String _enumName(dynamic value, List<String> names) {
+    if (value is String) return value;
+    if (value is int && value >= 1 && value <= names.length) {
+      return names[value - 1];
+    }
+    throw FormatException('قيمة enum غير مدعومة: $value');
+  }
 }
