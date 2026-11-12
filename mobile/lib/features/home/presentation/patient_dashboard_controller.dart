@@ -22,7 +22,7 @@ class PatientDashboardState {
   final String? message;
 }
 
-final patientDashboardProvider = NotifierProvider.autoDispose<
+final patientDashboardProvider = AutoDisposeNotifierProvider<
     PatientDashboardController, PatientDashboardState>(
   PatientDashboardController.new,
 );
