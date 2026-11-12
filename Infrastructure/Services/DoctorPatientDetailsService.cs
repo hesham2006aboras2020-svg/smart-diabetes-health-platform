@@ -80,6 +80,53 @@ public sealed class DoctorPatientDetailsService(DiabetesDbContext db) : IDoctorP
             activeMedications);
     }
 
+    public async Task<DoctorPatientMedicationAdherenceResponse> GetMedicationAdherenceAsync(
+        Guid doctorUserId,
+        Guid patientId,
+        int days,
+        CancellationToken cancellationToken)
+    {
+        if (days is < 1 or > 90)
+            throw new ArgumentException("الفترة يجب أن تكون بين يوم واحد و90 يومًا.");
+
+        await EnsureLinkedAsync(doctorUserId, patientId, cancellationToken);
+
+        var to = DateTime.UtcNow;
+        var from = to.AddDays(-days);
+
+        var logs = await db.MedicationLogs
+            .AsNoTracking()
+            .Where(x =>
+                x.Medication.PatientId == patientId &&
+                x.ScheduledTime >= from &&
+                x.ScheduledTime <= to)
+            .ToListAsync(cancellationToken);
+
+        var total = logs.Count;
+        var taken = logs.Count(x => x.Status == MedicationLogStatus.Taken);
+        var missed = logs.Count(x => x.Status == MedicationLogStatus.Missed);
+        var skipped = logs.Count(x => x.Status == MedicationLogStatus.Skipped);
+        var adherence = total == 0 ? 0m : Math.Round(taken * 100m / total, 2);
+
+        var activeMedicationCount = await db.Medications
+            .AsNoTracking()
+            .CountAsync(
+                x => x.PatientId == patientId && x.IsActive,
+                cancellationToken);
+
+        return new DoctorPatientMedicationAdherenceResponse(
+            patientId,
+            days,
+            total,
+            taken,
+            missed,
+            skipped,
+            adherence,
+            activeMedicationCount,
+            from,
+            to);
+    }
+
     public async Task<IReadOnlyList<DoctorPatientReadingResponse>> GetReadingsAsync(
         Guid doctorUserId, Guid patientId, int days, CancellationToken cancellationToken)
     {
