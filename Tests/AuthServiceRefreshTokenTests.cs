@@ -77,7 +77,7 @@ public sealed class AuthServiceRefreshTokenTests
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             service.RefreshAsync(
-                new RefreshTokenRequest(oldToken.Token),
+                new RefreshTokenRequest(rawToken),
                 CancellationToken.None));
     }
 
@@ -114,13 +114,22 @@ public sealed class AuthServiceRefreshTokenTests
         CreatedAt = DateTime.UtcNow
     };
 
-    private static RefreshToken CreateRefreshToken(User user, DateTime expiresAt) => new()
+    private static RefreshToken CreateRefreshToken(
+        User user,
+        string rawToken,
+        DateTime expiresAt) => new()
     {
         Id = Guid.NewGuid(),
         UserId = user.Id,
         User = user,
-        Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+        Token = HashRefreshToken(rawToken),
         ExpiresAt = expiresAt,
         CreatedAt = DateTime.UtcNow
     };
+
+    private static string HashRefreshToken(string token)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(hash);
+    }
 }
