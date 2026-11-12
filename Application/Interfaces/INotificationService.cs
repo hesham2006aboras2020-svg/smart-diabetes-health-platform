@@ -10,6 +10,9 @@ public interface INotificationService
     Task MarkAsReadAsync(
         Guid userId, Guid notificationId, CancellationToken cancellationToken);
 
+    Task MarkAllAsReadAsync(
+        Guid userId, CancellationToken cancellationToken);
+
     Task RegisterDeviceTokenAsync(
         Guid userId, RegisterDeviceTokenRequest request, CancellationToken cancellationToken);
 }
