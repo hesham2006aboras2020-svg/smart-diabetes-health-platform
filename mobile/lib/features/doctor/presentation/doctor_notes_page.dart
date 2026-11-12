@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/presentation/auth_controller.dart';
+// Doctor follow-up note entry.
 class DoctorNotesPage extends ConsumerStatefulWidget{
  const DoctorNotesPage(this.patientId,{super.key});
  final String patientId;
