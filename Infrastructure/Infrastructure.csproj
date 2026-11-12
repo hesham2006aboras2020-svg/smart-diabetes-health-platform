@@ -13,5 +13,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.14" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
+    <PackageReference Include="FirebaseAdmin" Version="3.7.0" />
   </ItemGroup>
 </Project>
