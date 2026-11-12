@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/medication_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
+import 'medication_actions.dart';
 final medicationRepositoryProvider=Provider((ref)=>MedicationRepository(ref.watch(apiClientProvider)));
 final medicationsProvider=FutureProvider.autoDispose((ref)=>ref.watch(medicationRepositoryProvider).getAll());
 final adherenceProvider=FutureProvider.autoDispose((ref)=>ref.watch(medicationRepositoryProvider).adherence());
@@ -18,7 +19,7 @@ class MedicationsPage extends ConsumerWidget{
       return Column(children:[for(final m in items) Card(child:ListTile(
        title:Text(m.name),
        subtitle:Text([m.dosage,m.instructions].whereType<String>().where((s)=>s.isNotEmpty).join(' • ')),
-       trailing:Switch(value:m.isActive,onChanged:(v)async{await ref.read(medicationRepositoryProvider).setStatus(m.id,v);ref.invalidate(medicationsProvider);}),
+       subtitle:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text([m.dosage,m.instructions].whereType<String>().where((s)=>s.isNotEmpty).join(' • ')),MedicationActions(medicationId:m.id)]),trailing:Switch(value:m.isActive,onChanged:(v)async{await ref.read(medicationRepositoryProvider).setStatus(m.id,v);ref.invalidate(medicationsProvider);}),
       ))]);
     }),
    ]));
