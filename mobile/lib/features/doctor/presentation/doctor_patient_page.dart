@@ -1,6 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'doctor_dashboard_page.dart';
+import 'patient_notes_button.dart';
 
 class DoctorPatientPage extends ConsumerWidget {
  const DoctorPatientPage({super.key, required this.patientId});
@@ -22,6 +23,7 @@ class DoctorPatientPage extends ConsumerWidget {
      _metric('الاتجاه', _trend(p.trend)),
      _metric('الأدوية النشطة', p.activeMeds.toString()),
      _metric('التنبيهات غير المقروءة', p.unreadAlerts.toString()),
+     const SizedBox(height: 12), PatientNotesButton(patientId: patientId),
     ]),
    ),
   );
