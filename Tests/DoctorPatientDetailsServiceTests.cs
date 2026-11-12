@@ -138,7 +138,7 @@ public sealed class DoctorPatientDetailsServiceTests
 
         var service = new DoctorPatientDetailsService(db);
 
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             service.GetMedicationAdherenceAsync(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
