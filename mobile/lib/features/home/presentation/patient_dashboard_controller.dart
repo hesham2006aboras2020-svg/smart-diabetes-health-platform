@@ -22,13 +22,13 @@ class PatientDashboardState {
   final String? message;
 }
 
-final patientDashboardProvider = AutoDisposeNotifierProvider<
+final patientDashboardProvider = NotifierProvider<
     PatientDashboardController, PatientDashboardState>(
   PatientDashboardController.new,
 );
 
 class PatientDashboardController
-    extends AutoDisposeNotifier<PatientDashboardState> {
+    extends Notifier<PatientDashboardState> {
   @override
   PatientDashboardState build() {
     Future<void>.microtask(load);
