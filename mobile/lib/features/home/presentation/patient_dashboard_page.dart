@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'patient_dashboard_controller.dart';
 import '../../glucose/presentation/add_glucose_page.dart';
+import '../../glucose/presentation/glucose_history_page.dart';
 
 class PatientDashboardPage extends ConsumerWidget {
   const PatientDashboardPage({super.key});
@@ -39,6 +40,14 @@ class PatientDashboardPage extends ConsumerWidget {
             ),
             icon: const Icon(Icons.add),
             label: const Text('تسجيل قراءة جديدة'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const GlucoseHistoryPage()),
+            ),
+            icon: const Icon(Icons.history),
+            label: const Text('عرض سجل القراءات'),
           ),
           const SizedBox(height: 20),
           Text('ملخص السكر', style: Theme.of(context).textTheme.headlineSmall),
