@@ -38,4 +38,3 @@ public interface IMedicationService
         DateTime? from,
         DateTime? to,
         CancellationToken cancellationToken = default);
-}
