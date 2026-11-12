@@ -32,13 +32,16 @@ final sessionManagerProvider = Provider<SessionManager>((ref) {
   );
 });
 
-final authRepositoryProvider = Provider<AuthRepository>((ref) {
+final apiClientProvider = Provider<ApiClient>((ref) {
   final session = ref.watch(sessionManagerProvider);
-  final client = ApiClient(
+  return ApiClient(
     baseUrl: AppConfig.apiBaseUrl,
     sessionManager: session,
   );
-  return AuthRepository(client);
+});
+
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  return AuthRepository(ref.watch(apiClientProvider));
 });
 
 final authControllerProvider =
