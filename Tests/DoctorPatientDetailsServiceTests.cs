@@ -142,7 +142,7 @@ public sealed class DoctorPatientDetailsServiceTests
             service.GetMedicationAdherenceAsync(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                0,
+                7,
                 CancellationToken.None));
     }
 }
