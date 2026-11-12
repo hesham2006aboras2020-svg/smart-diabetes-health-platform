@@ -93,6 +93,22 @@ public class MedicationsController(IMedicationService medicationService) : Contr
         }
     }
 
+    [HttpGet("adherence-summary")]
+    public async Task<ActionResult<MedicationAdherenceSummaryResponse>> GetAdherenceSummary(
+        [FromQuery] int days = 7,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            return Ok(await medicationService.GetAdherenceSummaryAsync(
+                GetUserId(), days, cancellationToken));
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
     [HttpGet("{medicationId:guid}/logs")]
     public async Task<ActionResult<IReadOnlyList<MedicationLogResponse>>> GetLogs(
         Guid medicationId,
