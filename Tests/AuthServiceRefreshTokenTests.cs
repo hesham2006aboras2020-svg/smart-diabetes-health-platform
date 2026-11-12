@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+using System.Text;
 using Application.DTOs.Auth;
 using Domain.Entities;
 using Domain.Enums;
@@ -16,7 +18,8 @@ public sealed class AuthServiceRefreshTokenTests
     {
         await using var db = CreateDb();
         var user = CreateUser();
-        var oldToken = CreateRefreshToken(user, DateTime.UtcNow.AddDays(1));
+        var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var oldToken = CreateRefreshToken(user, rawToken, DateTime.UtcNow.AddDays(1));
 
         db.Users.Add(user);
         db.RefreshTokens.Add(oldToken);
@@ -25,15 +28,16 @@ public sealed class AuthServiceRefreshTokenTests
         var service = CreateService(db);
 
         var response = await service.RefreshAsync(
-            new RefreshTokenRequest(oldToken.Token),
+            new RefreshTokenRequest(rawToken),
             CancellationToken.None);
 
         var revoked = await db.RefreshTokens.SingleAsync(x => x.Id == oldToken.Id);
-        var replacement = await db.RefreshTokens.SingleAsync(x => x.Token == response.RefreshToken);
+        var replacement = await db.RefreshTokens.SingleAsync(x => x.Token == HashRefreshToken(response.RefreshToken));
 
         Assert.True(revoked.RevokedAt.HasValue);
         Assert.NotEqual(oldToken.Token, response.RefreshToken);
         Assert.Equal(user.Id, replacement.UserId);
+        Assert.Equal(HashRefreshToken(rawToken), revoked.Token);
     }
 
     [Fact]
@@ -41,7 +45,8 @@ public sealed class AuthServiceRefreshTokenTests
     {
         await using var db = CreateDb();
         var user = CreateUser();
-        var oldToken = CreateRefreshToken(user, DateTime.UtcNow.AddDays(1));
+        var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var oldToken = CreateRefreshToken(user, rawToken, DateTime.UtcNow.AddDays(1));
         oldToken.RevokedAt = DateTime.UtcNow.AddMinutes(-1);
 
         db.Users.Add(user);
@@ -52,7 +57,7 @@ public sealed class AuthServiceRefreshTokenTests
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             service.RefreshAsync(
-                new RefreshTokenRequest(oldToken.Token),
+                new RefreshTokenRequest(rawToken),
                 CancellationToken.None));
     }
 
@@ -61,7 +66,8 @@ public sealed class AuthServiceRefreshTokenTests
     {
         await using var db = CreateDb();
         var user = CreateUser();
-        var oldToken = CreateRefreshToken(user, DateTime.UtcNow.AddMinutes(-1));
+        var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var oldToken = CreateRefreshToken(user, rawToken, DateTime.UtcNow.AddMinutes(-1));
 
         db.Users.Add(user);
         db.RefreshTokens.Add(oldToken);
@@ -71,7 +77,7 @@ public sealed class AuthServiceRefreshTokenTests
 
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
             service.RefreshAsync(
-                new RefreshTokenRequest(oldToken.Token),
+                new RefreshTokenRequest(rawToken),
                 CancellationToken.None));
     }
 
@@ -108,13 +114,22 @@ public sealed class AuthServiceRefreshTokenTests
         CreatedAt = DateTime.UtcNow
     };
 
-    private static RefreshToken CreateRefreshToken(User user, DateTime expiresAt) => new()
+    private static RefreshToken CreateRefreshToken(
+        User user,
+        string rawToken,
+        DateTime expiresAt) => new()
     {
         Id = Guid.NewGuid(),
         UserId = user.Id,
         User = user,
-        Token = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+        Token = HashRefreshToken(rawToken),
         ExpiresAt = expiresAt,
         CreatedAt = DateTime.UtcNow
     };
+
+    private static string HashRefreshToken(string token)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(hash);
+    }
 }

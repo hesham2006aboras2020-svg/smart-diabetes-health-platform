@@ -112,9 +112,10 @@ public sealed class AuthService(
             throw new ArgumentException("Refresh token is required.");
 
         var refreshToken = request.RefreshToken.Trim();
+        var tokenHash = HashRefreshToken(refreshToken);
         var storedToken = await db.RefreshTokens
             .Include(x => x.User)
-            .SingleOrDefaultAsync(x => x.Token == refreshToken, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Token == tokenHash, cancellationToken);
 
         if (storedToken is null || storedToken.RevokedAt.HasValue || storedToken.ExpiresAt <= DateTime.UtcNow)
             throw new UnauthorizedAccessException("Refresh token is invalid or expired.");
@@ -154,7 +155,7 @@ public sealed class AuthService(
         {
             Id = Guid.NewGuid(),
             UserId = user.Id,
-            Token = refresh,
+            Token = HashRefreshToken(refresh),
             ExpiresAt = DateTime.UtcNow.AddDays(14),
             CreatedAt = DateTime.UtcNow
         });
@@ -166,5 +167,10 @@ public sealed class AuthService(
             expires,
             user.Role.ToString(),
             user.AccountStatus.ToString());
+    }
+    private static string HashRefreshToken(string token)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(token));
+        return Convert.ToHexString(hash);
     }
 }
