@@ -2,6 +2,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/admin_repository.dart';
 import '../../auth/presentation/auth_controller.dart';
+import 'admin_users_page.dart';
+import 'admin_audit_page.dart';
 final adminRepositoryProvider=Provider((ref)=>AdminRepository(ref.watch(apiClientProvider)));
 final adminSummaryProvider=FutureProvider.autoDispose((ref)=>ref.watch(adminRepositoryProvider).summary());
 final approvalsProvider=FutureProvider.autoDispose((ref)=>ref.watch(adminRepositoryProvider).approvals());
@@ -11,7 +13,7 @@ class AdminDashboardPage extends ConsumerWidget{
   final s=ref.watch(adminSummaryProvider),a=ref.watch(approvalsProvider);
   return Scaffold(appBar:AppBar(title:const Text('لوحة الإدارة')),body:ListView(padding:const EdgeInsets.all(20),children:[
    s.when(loading:()=>const LinearProgressIndicator(),error:(_,_)=>const Text('تعذر تحميل الملخص.'),data:(x)=>Wrap(spacing:10,runSpacing:10,children:[_metric('المرضى',x.patients),_metric('الأطباء',x.doctors),_metric('طلبات معلقة',x.pending),_metric('تنبيهات غير مقروءة',x.alerts)])),
-   const SizedBox(height:24),Text('طلبات اعتماد الأطباء',style:Theme.of(context).textTheme.titleLarge),const SizedBox(height:8),
+   const SizedBox(height:12),Row(children:[Expanded(child:OutlinedButton.icon(onPressed:()=>Navigator.of(context).push(MaterialPageRoute(builder:(_)=>const AdminUsersPage())),icon:const Icon(Icons.people),label:const Text('المستخدمون'))),const SizedBox(width:8),Expanded(child:OutlinedButton.icon(onPressed:()=>Navigator.of(context).push(MaterialPageRoute(builder:(_)=>const AdminAuditPage())),icon:const Icon(Icons.history),label:const Text('سجل العمليات')))]),const SizedBox(height:24),Text('طلبات اعتماد الأطباء',style:Theme.of(context).textTheme.titleLarge),const SizedBox(height:8),
    a.when(loading:()=>const CircularProgressIndicator(),error:(_,_)=>const Text('تعذر تحميل الطلبات.'),data:(items){
     if(items.isEmpty)return const Text('لا توجد طلبات معلقة.');
     return Column(children:[for(final x in items)Card(child:ListTile(
