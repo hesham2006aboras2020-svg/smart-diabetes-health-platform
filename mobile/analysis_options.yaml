@@ -4,3 +4,5 @@ linter:
   rules:
     avoid_print: true
     prefer_single_quotes: true
+
+    prefer_interpolation_to_compose_strings: false
