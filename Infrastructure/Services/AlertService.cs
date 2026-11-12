@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Services;
 
-public sealed class AlertService(DiabetesDbContext db) : IAlertService
+public sealed class AlertService(DiabetesDbContext db, IPushNotificationService pushNotificationService) : IAlertService
 {
     public async Task<IReadOnlyList<AlertResponse>> GetMyAlertsAsync(
         Guid patientUserId, bool unreadOnly, CancellationToken cancellationToken)
@@ -110,9 +110,11 @@ public sealed class AlertService(DiabetesDbContext db) : IAlertService
         };
 
         db.Alerts.Add(alert);
+        var notificationId = Guid.NewGuid();
+
         db.Notifications.Add(new Notification
         {
-            Id = Guid.NewGuid(),
+            Id = notificationId,
             UserId = patientUserId,
             AlertId = alert.Id,
             Title = "تنبيه نمط متكرر",
@@ -124,6 +126,28 @@ public sealed class AlertService(DiabetesDbContext db) : IAlertService
         });
 
         await db.SaveChangesAsync(cancellationToken);
+
+        var sent = await pushNotificationService.SendToUserAsync(
+            patientUserId,
+            "تنبيه نمط متكرر",
+            message,
+            new Dictionary<string, string>
+            {
+                ["type"] = NotificationType.Alert.ToString(),
+                ["notificationId"] = notificationId.ToString(),
+                ["alertId"] = alert.Id.ToString()
+            },
+            cancellationToken);
+
+        if (sent > 0)
+        {
+            var notification = await db.Notifications
+                .SingleAsync(x => x.Id == notificationId, cancellationToken);
+            notification.IsSent = true;
+            notification.SentAt = DateTime.UtcNow;
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
         return 1;
     }
 }
