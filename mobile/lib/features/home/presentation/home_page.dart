@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/auth_controller.dart';
+import 'patient_dashboard_page.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -12,7 +13,7 @@ class HomePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('الرئيسية'),
+        title: Text(role == 'Doctor' ? 'لوحة الطبيب' : 'الرئيسية'),
         actions: [
           IconButton(
             tooltip: 'تسجيل الخروج',
@@ -22,18 +23,17 @@ class HomePage extends ConsumerWidget {
           ),
         ],
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            role == 'Doctor'
-                ? 'مرحبًا بك في لوحة الطبيب'
-                : 'مرحبًا بك في منصة السكري الذكية',
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-        ),
-      ),
+      body: role == 'Patient'
+          ? const PatientDashboardPage()
+          : const Center(
+              child: Padding(
+                padding: EdgeInsets.all(24),
+                child: Text(
+                  'مرحبًا بك في لوحة الطبيب. سيتم تجهيز أدوات المتابعة في الخطوة التالية.',
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
     );
   }
 }
