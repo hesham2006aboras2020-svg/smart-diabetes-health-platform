@@ -55,7 +55,7 @@ DiabetesPlatform/
 - الإصدار الأول يعتمد على Rule-Based Analytics وTrend Analysis ولا يفترض استخدام Machine Learning.
 
 ## حالة التنفيذ
-هذا الفرع مخصص لتأسيس المعمارية النهائية قبل بدء تنفيذ الميزات. سيتم تنفيذ قاعدة البيانات، Identity/JWT، APIs، ثم Flutter Patient/Doctor UI بشكل تدريجي مع الاختبارات.
+المشروع في مرحلة تنفيذ متقدمة: المصادقة والأدوار، موافقات الأطباء، إدارة المستخدمين، لوحات Patient/Doctor/Admin، الجلوكوز والتحليلات، الأدوية، التنبيهات والإشعارات، التقارير، الملاحظات، FCM، Audit Logs، Refresh Tokens، واختبارات Backend الأساسية منفذة.\n\nتمت إضافة Health Checks للـ API: `/api/health` و`/api/health/live` و`/api/health/ready`. كما يتم تنفيذ اختبارات الأمان والتكامل تدريجيًا قبل التسليم النهائي.
 
 
 ## Database Foundation
