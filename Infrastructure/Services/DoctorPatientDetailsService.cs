@@ -58,7 +58,7 @@ public sealed class DoctorPatientDetailsService(DiabetesDbContext db) : IDoctorP
         {
             var midpoint = values.Count / 2;
             var difference = values.Skip(midpoint).Average() - values.Take(midpoint).Average();
-            trend = Math.Abs(difference) < 10m ? "Stable" : difference > 0 ? "Rising" : "Falling";
+            trend = Math.Abs(difference) < 10m ? "Stable" : difference > 0 ? "Worsening" : "Improving";
         }
 
         var last = readings.LastOrDefault();
