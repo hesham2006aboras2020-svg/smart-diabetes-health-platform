@@ -109,14 +109,25 @@ public sealed class AdminServiceTests
     public async Task ReviewAlreadyReviewedApproval_ThrowsAndDoesNotCreateAnotherAuditLog()
     {
         await using var db = CreateDbContext();
+        var doctorUser = CreateUser("reviewed@example.com", Role.Doctor, AccountStatus.Active);
+        var doctor = new Doctor
+        {
+            Id = Guid.NewGuid(),
+            UserId = doctorUser.Id,
+            LicenseNumber = "LIC-006",
+            User = doctorUser
+        };
         var approval = new DoctorApprovalRequest
         {
             Id = Guid.NewGuid(),
-            DoctorId = Guid.NewGuid(),
+            DoctorId = doctor.Id,
+            Doctor = doctor,
             Status = ApprovalStatus.Approved,
             SubmittedAt = DateTime.UtcNow.AddDays(-1),
             ReviewedAt = DateTime.UtcNow
         };
+        db.Users.Add(doctorUser);
+        db.Doctors.Add(doctor);
         db.DoctorApprovalRequests.Add(approval);
         await db.SaveChangesAsync();
 
