@@ -11,10 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddHealthChecks()
     .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy(), tags: new[] { "live" })
-    .AddSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty,
-        name: "sql",
-        tags: new[] { "ready" });
+    .AddCheck<Infrastructure.Health.DatabaseHealthCheck>("database", tags: new[] { "ready" });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
