@@ -1,0 +1,9 @@
+{
+  "name": "Smart Diabetes Health Platform",
+  "short_name": "Smart Diabetes",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#F7FAFA",
+  "theme_color": "#157A8A",
+  "description": "منصة ذكية لإدارة ومتابعة الحالة الصحية لمرضى السكري"
+}
