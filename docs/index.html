@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Smart Diabetes Health Platform — منصة ذكية لإدارة ومتابعة الحالة الصحية لمرضى السكري.">
+<title>Smart Diabetes Health Platform</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="#home"><span class="logo">✚</span><span>Smart Diabetes</span></a>
+  <nav>
+    <a href="#features">المميزات</a><a href="#roles">المستخدمون</a><a href="#workflow">طريقة العمل</a><a href="#tech">التقنيات</a>
+  </nav>
+  <a class="nav-btn" href="https://github.com/hesham2006aboras2020-svg/smart-diabetes-health-platform" target="_blank" rel="noreferrer">المستودع ↗</a>
+</header>
+
+<main id="home">
+<section class="hero">
+  <div class="hero-copy">
+    <div class="eyebrow">مشروع تخرج • Smart Healthcare</div>
+    <h1>منصة ذكية لمتابعة <span>مرضى السكري</span></h1>
+    <p>نظام متكامل يربط المريض والطبيب ومدير النظام في منصة واحدة، مع تسجيل قراءات السكر، التحليلات الصحية، الأدوية، التنبيهات والتقارير.</p>
+    <div class="actions"><a class="primary" href="#workflow">كيف تعمل المنصة؟</a><a class="secondary" href="https://github.com/hesham2006aboras2020-svg/smart-diabetes-health-platform" target="_blank" rel="noreferrer">عرض الكود</a></div>
+    <div class="trust"><span>✓ Backend آمن</span><span>✓ Role-Based Access</span><span>✓ Analytics</span><span>✓ Audit Logs</span></div>
+  </div>
+  <div class="hero-card">
+    <div class="card-top"><span>لوحة المريض</span><span class="live">● متابعة</span></div>
+    <div class="glucose"><small>متوسط السكر</small><strong>128 <i>mg/dL</i></strong><div class="meter"><b></b></div><small>آخر 7 أيام</small></div>
+    <div class="mini-grid"><div><b>84%</b><span>ضمن النطاق</span></div><div><b>Stable</b><span>الاتجاه</span></div><div><b>24</b><span>قراءة</span></div><div><b>92</b><span>الاستقرار</span></div></div>
+  </div>
+</section>
+
+<section id="features" class="section">
+  <div class="section-head"><span class="eyebrow">المنصة</span><h2>كل ما تحتاجه المتابعة الصحية في مكان واحد</h2><p>تم تصميم النظام ليكون عمليًا، قابلًا للتوسع، وآمنًا مع إبقاء قواعد التحليل في الـ Backend.</p></div>
+  <div class="features">
+    <article><span class="icon">⌁</span><h3>قراءات السكر</h3><p>إضافة القراءات وعرض التاريخ والتصنيف: Low، In Range، High.</p></article>
+    <article><span class="icon">◔</span><h3>التحليلات</h3><p>Average، Min، Max، النسب، Trend، Stability Score وFollow-up Priority.</p></article>
+    <article><span class="icon">▣</span><h3>الأدوية</h3><p>إدارة الأدوية والجدول الزمني وتسجيل الجرعات.</p></article>
+    <article><span class="icon">!</span><h3>التنبيهات والإشعارات</h3><p>فصل واضح بين Alert الصحي وNotification التي تصل للمستخدم.</p></article>
+    <article><span class="icon">◫</span><h3>التقارير</h3><p>ملخص صحي منظم يساعد المريض والطبيب على متابعة البيانات.</p></article>
+    <article><span class="icon">✓</span><h3>الأمان والتدقيق</h3><p>JWT وRefresh Tokens وصلاحيات الأدوار وAudit Logs.</p></article>
+  </div>
+</section>
+
+<section id="roles" class="section dark-section">
+  <div class="section-head"><span class="eyebrow">Role-Based Platform</span><h2>ثلاثة أدوار، تجربة واحدة متكاملة</h2></div>
+  <div class="roles">
+    <article><div class="role-icon">👤</div><h3>المريض</h3><ul><li>إدخال ومتابعة السكر</li><li>التحليلات والتقارير</li><li>الأدوية والتنبيهات</li><li>الملف الشخصي</li></ul></article>
+    <article><div class="role-icon">⚕</div><h3>الطبيب</h3><ul><li>لوحة متابعة المرضى</li><li>تفاصيل وتحليلات المريض</li><li>التنبيهات والأدوية</li><li>ملاحظات وتقارير الطبيب</li></ul></article>
+    <article><div class="role-icon">⚙</div><h3>مدير النظام</h3><ul><li>الموافقات على الأطباء</li><li>إدارة المستخدمين</li><li>Dashboard إدارية</li><li>Audit Logs</li></ul></article>
+  </div>
+</section>
+
+<section id="workflow" class="section">
+  <div class="section-head"><span class="eyebrow">System Flow</span><h2>كيف تعمل المنصة؟</h2></div>
+  <div class="flow">
+    <div><b>01</b><h3>Flutter</h3><p>المستخدم يتفاعل مع التطبيق العربي RTL.</p></div><div class="arrow">←</div>
+    <div><b>02</b><h3>ASP.NET Core API</h3><p>التحقق من الهوية والصلاحيات وتنفيذ Business Logic.</p></div><div class="arrow">←</div>
+    <div><b>03</b><h3>Services + Domain</h3><p>قواعد السكر والتحليلات وإدارة البيانات.</p></div><div class="arrow">←</div>
+    <div><b>04</b><h3>SQL Server</h3><p>تخزين البيانات باستخدام EF Core.</p></div>
+  </div>
+  <div class="security"><strong>🔐 الأمان أولًا</strong><span>الطبيب لا يصل إلا إلى المرضى المرتبطين به، والطبيب الجديد يبقى Pending حتى موافقة Admin.</span></div>
+</section>
+
+<section id="tech" class="section tech-section">
+  <div class="section-head"><span class="eyebrow">Technology Stack</span><h2>تقنيات المشروع</h2></div>
+  <div class="stack"><span>Flutter / Dart</span><span>ASP.NET Core</span><span>C#</span><span>SQL Server</span><span>Entity Framework Core</span><span>Identity + JWT</span><span>Firebase FCM</span><span>GitHub Actions</span><span>xUnit</span><span>Swagger / OpenAPI</span></div>
+</section>
+
+<section class="cta">
+  <div><span class="eyebrow">Graduation Project</span><h2>Smart Diabetes Health Platform</h2><p>منصة قابلة للتطوير لإدارة ومتابعة البيانات الصحية لمرضى السكري.</p></div>
+  <a class="primary" href="https://github.com/hesham2006aboras2020-svg/smart-diabetes-health-platform" target="_blank" rel="noreferrer">زيارة GitHub ↗</a>
+</section>
+</main>
+<footer><span>© 2026 Smart Diabetes Health Platform</span><span>Graduation Project</span></footer>
+</body></html>

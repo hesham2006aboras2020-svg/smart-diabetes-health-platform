@@ -1,72 +1,33 @@
-name: Flutter Web
-
+name: Deploy Project Website
 on:
   push:
     branches: [main]
     paths:
-      - 'mobile/**'
+      - 'docs/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
-    inputs:
-      deploy_pages:
-        description: 'Deploy the built Flutter Web app to GitHub Pages (Pages must be enabled in repository settings)'
-        required: true
-        default: false
-        type: boolean
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mobile
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Pub get
-        run: flutter pub get
-
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Test
-        run: flutter test
-
-      - name: Build Web
-        run: flutter build web --release --base-href /smart-diabetes-health-platform/
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: mobile/build/web
-
   deploy:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_pages == true }}
-    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-
-      - name: Deploy to GitHub Pages
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./docs
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
