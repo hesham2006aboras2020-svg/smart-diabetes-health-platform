@@ -1,4 +1,4 @@
-name: Deploy Flutter Web to GitHub Pages
+name: Flutter Web
 
 on:
   push:
@@ -7,6 +7,12 @@ on:
       - 'mobile/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
+    inputs:
+      deploy_pages:
+        description: 'Deploy the built Flutter Web app to GitHub Pages (Pages must be enabled in repository settings)'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -33,13 +39,14 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
       - name: Pub get
         run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
 
       - name: Build Web
         run: flutter build web --release --base-href /smart-diabetes-health-platform/
@@ -50,12 +57,16 @@ jobs:
           path: mobile/build/web
 
   deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy_pages == true }}
     needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
