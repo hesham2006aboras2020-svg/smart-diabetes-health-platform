@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:go_router/go_router.dart';
 
 class WebLandingPage extends StatelessWidget {
@@ -219,6 +219,7 @@ class _TrustPoint extends StatelessWidget {
 }
 
 class _DashboardPreview extends StatelessWidget {
+  const _DashboardPreview();
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
