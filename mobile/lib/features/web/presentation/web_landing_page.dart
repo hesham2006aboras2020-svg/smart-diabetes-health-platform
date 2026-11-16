@@ -34,30 +34,25 @@ class WebLandingPage extends StatelessWidget {
                     LayoutBuilder(
                       builder: (context, constraints) {
                         final wide = constraints.maxWidth >= 820;
-                        final content = [
-                          Expanded(
-                            flex: 6,
-                            child: _HeroContent(
-                              onLogin: () => context.go('/login'),
-                              onRegister: () => context.go('/register'),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 5,
-                            child: _DashboardPreview(),
-                          ),
-                        ];
+                        final hero = _HeroContent(
+                          onLogin: () => context.go('/login'),
+                          onRegister: () => context.go('/register'),
+                        );
 
                         return wide
                             ? Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                children: content,
+                                children: [
+                                  Expanded(flex: 6, child: hero),
+                                  const SizedBox(width: 24),
+                                  const Expanded(flex: 5, child: _DashboardPreview()),
+                                ],
                               )
                             : Column(
                                 children: [
-                                  content[0],
+                                  hero,
                                   const SizedBox(height: 36),
-                                  content[1],
+                                  const _DashboardPreview(),
                                 ],
                               );
                       },
