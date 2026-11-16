@@ -6,6 +6,7 @@ import 'features/auth/presentation/auth_controller.dart';
 import 'features/auth/presentation/login_page.dart';
 import 'features/auth/presentation/register_page.dart';
 import 'features/home/presentation/home_page.dart';
+import 'features/web/presentation/web_landing_page.dart';
 
 class DiabetesApp extends ConsumerWidget {
   const DiabetesApp({super.key});
@@ -15,21 +16,27 @@ class DiabetesApp extends ConsumerWidget {
     final auth = ref.watch(authControllerProvider);
 
     final router = GoRouter(
-      initialLocation: '/login',
+      initialLocation: '/',
       redirect: (context, state) {
-        final isAuthRoute =
+        final isPublicRoute =
+            state.matchedLocation == '/' ||
             state.matchedLocation == '/login' ||
             state.matchedLocation == '/register';
+
         if (auth.status == AuthStatus.loading) return null;
-        if (auth.status == AuthStatus.authenticated && isAuthRoute) {
+        if (auth.status == AuthStatus.authenticated && isPublicRoute) {
           return '/home';
         }
-        if (auth.status != AuthStatus.authenticated && !isAuthRoute) {
+        if (auth.status != AuthStatus.authenticated && !isPublicRoute) {
           return '/login';
         }
         return null;
       },
       routes: [
+        GoRoute(
+          path: '/',
+          builder: (context, state) => const WebLandingPage(),
+        ),
         GoRoute(
           path: '/login',
           builder: (context, state) => const LoginPage(),
