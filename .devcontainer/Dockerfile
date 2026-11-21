@@ -20,6 +20,7 @@ RUN apt-get update \
        ninja-build \
        pkg-config \
        libgtk-3-0 \
+       docker.io \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 --branch stable https://github.com/flutter/flutter.git ${FLUTTER_HOME} \
