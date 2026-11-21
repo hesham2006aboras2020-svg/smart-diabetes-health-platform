@@ -1,0 +1,45 @@
+{
+  "name": "Smart Diabetes Health Platform",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "root",
+  "workspaceFolder": "/workspaces/smart-diabetes-health-platform",
+  "forwardPorts": [5000, 5001, 8080],
+  "portsAttributes": {
+    "5000": {
+      "label": "ASP.NET Core API",
+      "protocol": "http",
+      "onAutoForward": "notify"
+    },
+    "5001": {
+      "label": "ASP.NET Core HTTPS",
+      "protocol": "https",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Flutter Web",
+      "protocol": "http",
+      "onAutoForward": "notify"
+    }
+  },
+  "containerEnv": {
+    "ASPNETCORE_ENVIRONMENT": "Development",
+    "ASPNETCORE_URLS": "http://0.0.0.0:5000"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code",
+        "ms-dotnettools.csdevkit"
+      ],
+      "settings": {
+        "dart.flutterSdkPath": "/opt/flutter",
+        "dotnet.defaultSolution": "DiabetesPlatform.sln"
+      }
+    }
+  },
+  "postCreateCommand": "dotnet restore DiabetesPlatform.sln && cd mobile && flutter pub get"
+}
