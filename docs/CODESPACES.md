@@ -134,3 +134,7 @@ docker logs smart-diabetes-sqlserver
 ~~~
 
 The local SQL Server is intended for development and testing inside the Codespace. For a persistent shared/cloud environment, use a managed SQL Server-compatible service such as Azure SQL and store the connection string as a secret.
+### Rebuilding an existing Codespace
+
+The Codespace configuration uses the official Docker-in-Docker Dev Container Feature so Docker is available to the SQL Server startup script. After pulling a change to `.devcontainer/devcontainer.json`, an existing Codespace must be rebuilt from the Command Palette (`Codespaces: Rebuild Container`) before Docker changes take effect. The development environment also generates a local JWT signing key alongside the SQL Server development credentials in `.codespaces/sql.env`; this file is ignored by Git and must never be committed.
+

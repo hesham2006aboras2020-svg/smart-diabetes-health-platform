@@ -6,8 +6,18 @@
   },
   "remoteUser": "root",
   "workspaceFolder": "/workspaces/smart-diabetes-health-platform",
-  "forwardPorts": [5000, 5001, 8080, 1433],
+  "forwardPorts": [
+    5000,
+    5001,
+    8080,
+    1433
+  ],
   "portsAttributes": {
+    "1433": {
+      "label": "SQL Server",
+      "protocol": "tcp",
+      "onAutoForward": "silent"
+    },
     "5000": {
       "label": "ASP.NET Core API",
       "protocol": "http",
@@ -21,11 +31,6 @@
     "8080": {
       "label": "Flutter Web",
       "protocol": "http"
-    },
-    "1433": {
-      "label": "SQL Server",
-      "protocol": "tcp",
-      "onAutoForward": "silent"
     }
   },
   "containerEnv": {
@@ -45,5 +50,10 @@
       }
     }
   },
-  "postCreateCommand": "dotnet restore DiabetesPlatform.sln && cd mobile && flutter pub get && cd .. && bash ./scripts/start-codespaces-sqlserver.sh"
+  "postCreateCommand": "dotnet restore DiabetesPlatform.sln && cd mobile && flutter pub get",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:4": {}
+  },
+  "postStartCommand": "bash ./scripts/start-codespaces-sqlserver.sh",
+  "waitFor": "postStartCommand"
 }
