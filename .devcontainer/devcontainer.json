@@ -45,5 +45,5 @@
       }
     }
   },
-  "postCreateCommand": "dotnet restore DiabetesPlatform.sln && cd mobile && flutter pub get && cd .. && ./scripts/start-codespaces-sqlserver.sh"
+  "postCreateCommand": "dotnet restore DiabetesPlatform.sln && cd mobile && flutter pub get && cd .. && bash ./scripts/start-codespaces-sqlserver.sh"
 }
