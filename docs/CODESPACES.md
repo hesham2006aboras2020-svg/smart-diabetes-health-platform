@@ -99,6 +99,38 @@ flutter test
 flutter build web --release --dart-define=API_BASE_URL=https://<your-forwarded-api-host>
 ~~~
 
-## Important limitation
+## Local SQL Server in Codespaces
 
-Codespaces does not automatically provide the project's SQL Server database. The API readiness check and database-backed features require a reachable SQL Server instance. For a persistent cloud environment, use a managed SQL Server-compatible service such as Azure SQL and store the connection string as a secret.
+The Codespace now includes the Docker CLI and automatically starts a local SQL Server 2022 Developer container during creation.
+
+The bootstrap script:
+
+- Creates a persistent Docker volume named `smart-diabetes-sqlserver-data`.
+- Starts SQL Server on `localhost:1433`.
+- Generates a development-only SA password if one does not already exist.
+- Stores the generated password and connection string in `.codespaces/sql.env`, which is ignored by Git.
+- Waits for SQL Server to become ready.
+- Applies the existing EF Core migrations. It does not create, delete, or modify migrations.
+
+After the Codespace is created, load the connection settings before starting the API:
+
+~~~bash
+source .codespaces/sql.env
+dotnet run --project API/API.csproj
+~~~
+
+Then verify:
+
+~~~bash
+curl http://localhost:5000/api/health
+curl http://localhost:5000/api/health/ready
+~~~
+
+To inspect the SQL Server container:
+
+~~~bash
+docker ps
+docker logs smart-diabetes-sqlserver
+~~~
+
+The local SQL Server is intended for development and testing inside the Codespace. For a persistent shared/cloud environment, use a managed SQL Server-compatible service such as Azure SQL and store the connection string as a secret.
