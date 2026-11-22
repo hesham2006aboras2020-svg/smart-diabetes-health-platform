@@ -1,8 +1,9 @@
-FROM mcr.microsoft.com/dotnet/sdk:10.0
+FROM mcr.microsoft.com/devcontainers/dotnet:10.0
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FLUTTER_HOME=/opt/flutter
-ENV PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/root/.dotnet/tools:$PATH
+ENV DOTNET_TOOLS=/opt/dotnet-tools
+ENV PATH=/opt/flutter/bin:/opt/flutter/bin/cache/dart-sdk/bin:/opt/dotnet-tools:$PATH
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -20,14 +21,18 @@ RUN apt-get update \
        ninja-build \
        pkg-config \
        libgtk-3-0 \
+       openssl \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth 1 --branch stable https://github.com/flutter/flutter.git ${FLUTTER_HOME} \
-    && flutter config --enable-web \
-    && flutter config --no-analytics \
-    && flutter precache --web
+    && ${FLUTTER_HOME}/bin/flutter config --enable-web \
+    && ${FLUTTER_HOME}/bin/flutter config --no-analytics \
+    && ${FLUTTER_HOME}/bin/flutter precache --web \
+    && chown -R vscode:vscode ${FLUTTER_HOME}
 
-RUN dotnet tool install --global dotnet-ef --version 10.0.14
+RUN mkdir -p ${DOTNET_TOOLS} \
+    && dotnet tool install --tool-path ${DOTNET_TOOLS} dotnet-ef --version 10.0.14 \
+    && chmod -R a+rx ${DOTNET_TOOLS}
 
 WORKDIR /workspaces/smart-diabetes-health-platform
 
