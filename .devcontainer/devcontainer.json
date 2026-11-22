@@ -6,6 +6,9 @@
   },
   "remoteUser": "root",
   "workspaceFolder": "/workspaces/smart-diabetes-health-platform",
+  "runArgs": [
+    "--privileged"
+  ],
   "forwardPorts": [
     5000,
     5001,
