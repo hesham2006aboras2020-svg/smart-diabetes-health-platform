@@ -819,7 +819,7 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Domain.Entities.Patient", "Patient")
                         .WithMany("Alerts")
                         .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("GlucoseReading");
