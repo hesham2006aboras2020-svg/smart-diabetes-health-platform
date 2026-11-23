@@ -52,7 +52,5 @@
   "postCreateCommand": "dotnet restore DiabetesPlatform.sln && cd mobile && flutter pub get",
   "features": {
     "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
-  },
-  "postStartCommand": "bash ./scripts/start-codespaces-sqlserver.sh",
-  "waitFor": "postStartCommand"
+  }
 }

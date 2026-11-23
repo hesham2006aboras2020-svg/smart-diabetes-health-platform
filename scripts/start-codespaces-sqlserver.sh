@@ -29,6 +29,9 @@ if [[ -z "${JWT_KEY:-}" ]]; then
 fi
 
 umask 077
+export MSSQL_SA_PASSWORD JWT_KEY
+export ConnectionStrings__DefaultConnection="Server=localhost,1433;Database=DiabetesPlatformDb;User Id=sa;Password=$MSSQL_SA_PASSWORD;TrustServerCertificate=True;MultipleActiveResultSets=true"
+export Jwt__Key="$JWT_KEY"
 cat > "$ENV_FILE" <<EOF
 MSSQL_SA_PASSWORD='$MSSQL_SA_PASSWORD'
 ConnectionStrings__DefaultConnection='Server=localhost,1433;Database=DiabetesPlatformDb;User Id=sa;Password=$MSSQL_SA_PASSWORD;TrustServerCertificate=True;MultipleActiveResultSets=true'
