@@ -7,11 +7,10 @@ public readonly record struct StabilityReading(decimal ValueMgDl, DateTime Measu
 public static class StabilityScoreCalculator
 {
     public const int MinimumReadings = 7;
-    public const int MinimumDistinctMeasurementDays = 3;
 
-    public static decimal? Calculate(IReadOnlyList<StabilityReading> readings)
+    public static decimal? Calculate(IReadOnlyList<StabilityReading> readings, int windowDays)
     {
-        if (!HasSufficientData(readings))
+        if (!HasSufficientData(readings, windowDays))
             return null;
 
         var inRange = readings.Count(x => x.ValueMgDl is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl) * 100m / readings.Count;
@@ -26,9 +25,12 @@ public static class StabilityScoreCalculator
         return Math.Round(Math.Clamp(inRange - penalty + dataBonus - trendPenalty, 0m, 100m), 2);
     }
 
-    public static bool HasSufficientData(IReadOnlyList<StabilityReading> readings) =>
+    public static bool HasSufficientData(IReadOnlyList<StabilityReading> readings, int windowDays) =>
         readings.Count >= MinimumReadings &&
-        readings.Select(x => x.MeasurementDateTime.Date).Distinct().Count() >= MinimumDistinctMeasurementDays;
+        readings.Select(x => x.MeasurementDateTime.Date).Distinct().Count() >= RequiredDistinctDays(windowDays);
+
+    public static int RequiredDistinctDays(int windowDays) =>
+        Math.Max(2, (int)Math.Ceiling(windowDays * 0.25m));
 
     private static TrendType CalculateTrend(IReadOnlyList<decimal> values)
     {
