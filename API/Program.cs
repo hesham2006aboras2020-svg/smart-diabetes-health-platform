@@ -43,6 +43,7 @@ if (string.IsNullOrWhiteSpace(jwt.Key) || jwt.Key.Length < 32)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+        options.EventsType = typeof(ActiveUserJwtBearerEvents);
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
