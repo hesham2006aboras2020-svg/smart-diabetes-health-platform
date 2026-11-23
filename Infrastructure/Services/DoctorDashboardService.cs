@@ -54,6 +54,10 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
             }
 
             var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
+            var stabilityReadings = readings
+                .Select((x, index) => new StabilityReading(values[index], x.MeasurementDateTime))
+                .ToList();
+
             var inRange = values.Count(x => x is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
             var high = values.Count(x => x > GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
             var low = values.Count(x => x < GlucoseRules.LowThresholdMgDl) * 100m / values.Count;
@@ -65,12 +69,12 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
                     ? TrendType.Stable.ToString()
                     : values.Skip(midpoint).Average() > values.Take(midpoint).Average() ? TrendType.Worsening.ToString() : TrendType.Improving.ToString();
 
-            var penalty = Math.Min(40m, (high + low) * 0.8m);
-            var trendPenalty = trend == TrendType.Worsening.ToString() ? 10m : trend == TrendType.Improving.ToString() ? 5m : 0m;
-            var score = Math.Clamp(inRange - penalty + (values.Count >= 7 ? 10m : values.Count / 7m * 10m) - trendPenalty, 0m, 100m);
-            var level = score >= 80m ? "Good" : score >= 60m ? "Moderate" : "NeedsFollowUp";
+            var score = StabilityScoreCalculator.Calculate(stabilityReadings, 7);
+            var level = score is null
+                ? "InsufficientData"
+                : score >= 80m ? "Good" : score >= 60m ? "Moderate" : "NeedsFollowUp";
 
-            var priority = values.Count < 7
+            var priority = score is null
                 ? "LowData"
                 : low >= 15m || high >= 30m
                     ? "High"
@@ -88,7 +92,7 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
                 Math.Round(values.Average(), 2),
                 Math.Round(inRange, 2),
                 trend,
-                Math.Round(score, 2),
+                score,
                 level,
                 priority,
                 alerts));
