@@ -49,7 +49,7 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
             {
                 result.Add(new DoctorPatientDashboardResponse(
                     patient.PatientId, patient.PatientName, null, null, null, null,
-                    "InsufficientData", null, "InsufficientData", "LowData", alerts);
+                    "InsufficientData", null, "InsufficientData", "LowData", alerts));
                 continue;
             }
 
