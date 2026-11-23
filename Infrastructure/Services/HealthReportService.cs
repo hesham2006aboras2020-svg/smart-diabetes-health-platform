@@ -26,10 +26,13 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
         var readings = await db.GlucoseReadings.AsNoTracking()
             .Where(x => x.PatientId == patient.Id && x.MeasurementDateTime >= start && x.MeasurementDateTime < endExclusive)
             .OrderBy(x => x.MeasurementDateTime)
-            .Select(x => new { x.GlucoseValue, x.Unit })
+            .Select(x => new { x.GlucoseValue, x.Unit, x.MeasurementDateTime })
             .ToListAsync(cancellationToken);
 
         var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
+        var stabilityReadings = readings
+            .Select((x, index) => new StabilityReading(values[index], x.MeasurementDateTime))
+            .ToList();
 
         var report = new Domain.Entities.HealthReport
         {
@@ -45,7 +48,7 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
             HighPercentage = values.Count == 0 ? null : Math.Round(values.Count(v => v > GlucoseRules.HighThresholdMgDl) * 100m / values.Count, 2),
             LowPercentage = values.Count == 0 ? null : Math.Round(values.Count(v => v < GlucoseRules.LowThresholdMgDl) * 100m / values.Count, 2),
             Trend = CalculateTrend(values),
-            StabilityScore = values.Count == 0 ? null : CalculateStabilityScore(values),
+            StabilityScore = StabilityScoreCalculator.Calculate(stabilityReadings),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -94,18 +97,6 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
         var second = values.Skip(midpoint).Average();
         var difference = second - first;
         return Math.Abs(difference) < GlucoseRules.TrendStabilityDeltaMgDl ? TrendType.Stable : difference > 0 ? TrendType.Worsening : TrendType.Improving;
-    }
-
-    private static decimal CalculateStabilityScore(IReadOnlyList<decimal> values)
-    {
-        var inRange = values.Count(v => v is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
-        var high = values.Count(v => v > GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
-        var low = values.Count(v => v < GlucoseRules.LowThresholdMgDl) * 100m / values.Count;
-        var trend = CalculateTrend(values);
-        var penalty = Math.Min(40m, (high + low) * 0.8m);
-        var trendPenalty = trend == TrendType.Worsening ? 10m : trend == TrendType.Improving ? 5m : 0m;
-        var dataBonus = values.Count >= 7 ? 10m : values.Count / 7m * 10m;
-        return Math.Round(Math.Clamp(inRange - penalty + dataBonus - trendPenalty, 0m, 100m), 2);
     }
 
     private static HealthReportResponse Map(Domain.Entities.HealthReport report) =>
