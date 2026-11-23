@@ -47,6 +47,37 @@ public sealed class HealthAnalyticsServiceTests
     }
 
     [Fact]
+    public async Task AnalyzeAsync_DoesNotAssignStabilityScore_WhenReadingsAreClusteredOnOneDay()
+    {
+        await using var db = CreateDb();
+        var patientUser = CreateUser();
+        var patient = new Patient { Id = Guid.NewGuid(), UserId = patientUser.Id, User = patientUser, CreatedAt = DateTime.UtcNow };
+        db.Users.Add(patientUser);
+        db.Patients.Add(patient);
+
+        var day = DateTime.UtcNow.AddDays(-1).Date;
+        for (var i = 0; i < 7; i++)
+        {
+            db.GlucoseReadings.Add(new GlucoseReading
+            {
+                Id = Guid.NewGuid(), PatientId = patient.Id, Patient = patient,
+                GlucoseValue = 100 + i, Unit = GlucoseUnit.MgDl,
+                MeasurementDateTime = day.AddHours(i),
+                MeasurementContext = MeasurementContext.Fasting,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+        await db.SaveChangesAsync();
+
+        var result = await new HealthAnalyticsService(db).AnalyzeAsync(patientUser.Id, 7, CancellationToken.None);
+
+        Assert.Equal(7, result.ReadingCount);
+        Assert.Null(result.StabilityScore);
+        Assert.Equal("InsufficientData", result.StabilityLevel);
+        Assert.Equal("LowData", result.FollowUpPriority);
+    }
+
+    [Fact]
     public async Task AnalyzeAsync_ConvertsMmolAndDetectsWorseningHighPriority()
     {
         await using var db = CreateDb();
