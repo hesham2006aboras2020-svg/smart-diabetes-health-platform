@@ -112,7 +112,7 @@ public class DiabetesDbContext(DbContextOptions<DiabetesDbContext> options) : Id
             e.Property(x => x.AlertType).HasConversion<string>().HasMaxLength(40);
             e.Property(x => x.Severity).HasConversion<string>().HasMaxLength(20);
             e.Property(x => x.Message).HasMaxLength(500).IsRequired();
-            e.HasOne(x => x.Patient).WithMany(x => x.Alerts).HasForeignKey(x => x.PatientId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(x => x.Patient).WithMany(x => x.Alerts).HasForeignKey(x => x.PatientId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(x => x.GlucoseReading).WithMany(x => x.Alerts).HasForeignKey(x => x.GlucoseReadingId).OnDelete(DeleteBehavior.SetNull);
         });
 
