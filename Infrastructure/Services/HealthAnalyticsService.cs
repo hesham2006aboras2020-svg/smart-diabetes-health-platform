@@ -37,7 +37,7 @@ public sealed class HealthAnalyticsService(DiabetesDbContext db) : IHealthAnalyt
         var highPercentage = values.Count(x => x > GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
         var lowPercentage = values.Count(x => x < GlucoseRules.LowThresholdMgDl) * 100m / values.Count;
         var trend = CalculateTrend(values);
-        var score = StabilityScoreCalculator.Calculate(stabilityReadings);
+        var score = StabilityScoreCalculator.Calculate(stabilityReadings, days);
 
         var stabilityLevel = score is null
             ? "InsufficientData"
