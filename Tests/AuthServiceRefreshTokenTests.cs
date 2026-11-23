@@ -81,6 +81,29 @@ public sealed class AuthServiceRefreshTokenTests
                 CancellationToken.None));
     }
 
+    [Fact]
+    public async Task RefreshAsync_RejectsTokenForDisabledUser()
+    {
+        await using var db = CreateDb();
+        var user = CreateUser();
+        var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var refreshToken = CreateRefreshToken(user, rawToken, DateTime.UtcNow.AddDays(1));
+
+        db.Users.Add(user);
+        db.RefreshTokens.Add(refreshToken);
+        await db.SaveChangesAsync();
+
+        user.AccountStatus = AccountStatus.Suspended;
+        await db.SaveChangesAsync();
+
+        var service = CreateService(db);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
+            service.RefreshAsync(
+                new RefreshTokenRequest(rawToken),
+                CancellationToken.None));
+    }
+
     private static DiabetesDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<DiabetesDbContext>()
