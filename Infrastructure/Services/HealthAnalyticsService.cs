@@ -21,7 +21,7 @@ public sealed class HealthAnalyticsService(DiabetesDbContext db) : IHealthAnalyt
                         x.MeasurementDateTime >= from &&
                         x.MeasurementDateTime <= DateTime.UtcNow)
             .OrderBy(x => x.MeasurementDateTime)
-            .Select(x => new { x.GlucoseValue, x.Unit })
+            .Select(x => new { x.GlucoseValue, x.Unit, x.MeasurementDateTime })
             .ToListAsync(cancellationToken);
 
         if (readings.Count == 0)
@@ -29,18 +29,22 @@ public sealed class HealthAnalyticsService(DiabetesDbContext db) : IHealthAnalyt
                 "InsufficientData", null, "InsufficientData", "Normal");
 
         var values = readings.Select(x => GlucoseValueConverter.ToMgDl(x.GlucoseValue, x.Unit)).ToList();
+        var stabilityReadings = readings
+            .Select((x, index) => new StabilityReading(values[index], x.MeasurementDateTime))
+            .ToList();
+
         var inRangePercentage = values.Count(x => x is >= GlucoseRules.LowThresholdMgDl and <= GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
         var highPercentage = values.Count(x => x > GlucoseRules.HighThresholdMgDl) * 100m / values.Count;
         var lowPercentage = values.Count(x => x < GlucoseRules.LowThresholdMgDl) * 100m / values.Count;
         var trend = CalculateTrend(values);
+        var score = StabilityScoreCalculator.Calculate(stabilityReadings);
 
-        var abnormalPenalty = Math.Min(40m, (highPercentage + lowPercentage) * 0.8m);
-        var trendPenalty = trend == TrendType.Worsening.ToString() ? 10m : trend == TrendType.Improving.ToString() ? 5m : 0m;
-        var coverageBonus = values.Count >= 7 ? 10m : values.Count / 7m * 10m;
-        var score = Math.Clamp(inRangePercentage - abnormalPenalty + coverageBonus - trendPenalty, 0m, 100m);
-
-        var stabilityLevel = score >= 80m ? "Good" : score >= 60m ? "Moderate" : "NeedsFollowUp";
-        var priority = CalculateFollowUpPriority(lowPercentage, highPercentage, trend, values.Count);
+        var stabilityLevel = score is null
+            ? "InsufficientData"
+            : score >= 80m ? "Good" : score >= 60m ? "Moderate" : "NeedsFollowUp";
+        var priority = score is null
+            ? "LowData"
+            : CalculateFollowUpPriority(lowPercentage, highPercentage, trend, values.Count);
 
         return new HealthAnalyticsResponse(
             days, values.Count,
@@ -51,7 +55,7 @@ public sealed class HealthAnalyticsService(DiabetesDbContext db) : IHealthAnalyt
             Math.Round(highPercentage, 2),
             Math.Round(lowPercentage, 2),
             trend,
-            Math.Round(score, 2),
+            score,
             stabilityLevel,
             priority);
     }
