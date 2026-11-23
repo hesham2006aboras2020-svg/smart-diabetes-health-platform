@@ -48,7 +48,7 @@ public sealed class HealthReportService(DiabetesDbContext db) : IHealthReportSer
             HighPercentage = values.Count == 0 ? null : Math.Round(values.Count(v => v > GlucoseRules.HighThresholdMgDl) * 100m / values.Count, 2),
             LowPercentage = values.Count == 0 ? null : Math.Round(values.Count(v => v < GlucoseRules.LowThresholdMgDl) * 100m / values.Count, 2),
             Trend = CalculateTrend(values),
-            StabilityScore = StabilityScoreCalculator.Calculate(stabilityReadings),
+            StabilityScore = StabilityScoreCalculator.Calculate(stabilityReadings, request.EndDate.DayNumber - request.StartDate.DayNumber + 1),
             CreatedAt = DateTime.UtcNow
         };
 
