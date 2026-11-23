@@ -69,7 +69,7 @@ public sealed class DoctorDashboardService(DiabetesDbContext db) : IDoctorDashbo
                     ? TrendType.Stable.ToString()
                     : values.Skip(midpoint).Average() > values.Take(midpoint).Average() ? TrendType.Worsening.ToString() : TrendType.Improving.ToString();
 
-            var score = StabilityScoreCalculator.Calculate(stabilityReadings);
+            var score = StabilityScoreCalculator.Calculate(stabilityReadings, 7);
             var level = score is null
                 ? "InsufficientData"
                 : score >= 80m ? "Good" : score >= 60m ? "Moderate" : "NeedsFollowUp";
