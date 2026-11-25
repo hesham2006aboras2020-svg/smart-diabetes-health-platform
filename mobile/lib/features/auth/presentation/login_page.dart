@@ -52,8 +52,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 32),
                   TextField(
                     controller: _usernameController,
+                    minLines: 1,
+                    maxLines: 1,
                     textDirection: TextDirection.ltr,
                     decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       labelText: 'اسم المستخدم أو البريد الإلكتروني',
                       prefixIcon: Icon(Icons.person_outline),
                     ),
@@ -61,8 +65,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   const SizedBox(height: 16),
                   TextField(
                     controller: _passwordController,
+                    minLines: 1,
+                    maxLines: 1,
                     obscureText: true,
                     decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       labelText: 'كلمة المرور',
                       prefixIcon: Icon(Icons.lock_outline),
                     ),
