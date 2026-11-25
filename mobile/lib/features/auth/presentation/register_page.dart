@@ -82,8 +82,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: _fullNameController,
+                      minLines: 1,
+                      maxLines: 1,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         labelText: 'الاسم الكامل',
                         prefixIcon: Icon(Icons.badge_outlined),
                       ),
@@ -95,10 +99,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _emailController,
+                      minLines: 1,
+                      maxLines: 1,
                       keyboardType: TextInputType.emailAddress,
                       textDirection: TextDirection.ltr,
                       textInputAction: TextInputAction.next,
                       decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         labelText: 'البريد الإلكتروني',
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
@@ -114,9 +122,13 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _passwordController,
+                      minLines: 1,
+                      maxLines: 1,
                       obscureText: _obscurePassword,
                       textInputAction: TextInputAction.next,
                       decoration: InputDecoration(
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         labelText: 'كلمة المرور',
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
@@ -152,8 +164,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _licenseController,
+                        minLines: 1,
+                        maxLines: 1,
                         textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           labelText: 'رقم الترخيص الطبي',
                           prefixIcon: Icon(Icons.verified_user_outlined),
                         ),
@@ -166,8 +182,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _specializationController,
+                        minLines: 1,
+                        maxLines: 1,
                         textInputAction: TextInputAction.next,
                         decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           labelText: 'التخصص الطبي (اختياري)',
                           prefixIcon: Icon(Icons.local_hospital_outlined),
                         ),
@@ -175,8 +195,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _clinicController,
+                        minLines: 1,
+                        maxLines: 1,
                         textInputAction: TextInputAction.done,
                         decoration: const InputDecoration(
+                        isDense: true,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           labelText: 'اسم العيادة (اختياري)',
                           prefixIcon: Icon(Icons.business_outlined),
                         ),
