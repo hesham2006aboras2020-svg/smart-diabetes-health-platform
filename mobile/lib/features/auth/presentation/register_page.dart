@@ -177,6 +177,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             minLines: 1,
                             maxLines: 1,
                             obscureText: _obscurePassword,
+                            keyboardType: TextInputType.number,
+                            textInputAction: TextInputAction.next,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: 'كلمة المرور',
@@ -199,13 +201,162 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               if (value == null || value.isEmpty) {
                                 return 'أدخل كلمة المرور.';
                               }
-                              if (value.length < 8) {
-                                return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
-                              }
-                              if (!RegExp(r'[A-Z]').hasMatch(value) ||
-                                  !RegExp(r'[a-z]').hasMatch(value) ||
-                                  !RegExp(r'[0-9]').hasMatch(value)) {
-                                return 'استخدم حرفًا كبيرًا وصغيرًا ورقمًا.';
+                              if (!RegExp(r'^\\d{6,15}
+                              return null;
+                            },
+                          ),
+                          if (_role == 'Doctor') ...[
+                            const SizedBox(height: 14),
+                            _field(
+                              controller: _licenseController,
+                              label: 'رقم الترخيص الطبي',
+                              icon: Icons.verified_user_outlined,
+                              textInputAction: TextInputAction.next,
+                              validator: (value) =>
+                                  value == null || value.trim().isEmpty
+                                      ? 'رقم الترخيص الطبي مطلوب للطبيب.'
+                                      : null,
+                            ),
+                            const SizedBox(height: 14),
+                            _field(
+                              controller: _specializationController,
+                              label: 'التخصص الطبي (اختياري)',
+                              icon: Icons.local_hospital_outlined,
+                              textInputAction: TextInputAction.next,
+                            ),
+                            const SizedBox(height: 14),
+                            _field(
+                              controller: _clinicController,
+                              label: 'اسم العيادة (اختياري)',
+                              icon: Icons.business_outlined,
+                              textInputAction: TextInputAction.done,
+                            ),
+                          ],
+                          if (auth.message != null &&
+                              auth.status == AuthStatus.error) ...[
+                            const SizedBox(height: 14),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.errorContainer,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Text(
+                                auth.message!,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onErrorContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 22),
+                          FilledButton.icon(
+                            onPressed: _submitting ? null : _submit,
+                            icon: _submitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.person_add_alt_1),
+                            label: Text(
+                              _submitting ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: _submitting ? null : () => context.go('/login'),
+                            child: const Text('لديك حساب؟ تسجيل الدخول'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    TextInputType? keyboardType,
+    TextDirection? direction,
+    TextInputAction? textInputAction,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      minLines: 1,
+      maxLines: 1,
+      keyboardType: keyboardType,
+      textDirection: direction,
+      textInputAction: textInputAction,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon),
+      ),
+      validator: validator,
+    );
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _submitting = true);
+    final response =
+        await ref.read(authControllerProvider.notifier).register(
+              fullName: _fullNameController.text,
+              email: _emailController.text,
+              phoneNumber: _phoneController.text,
+              password: _passwordController.text,
+              role: _role,
+              licenseNumber:
+                  _role == 'Doctor' ? _licenseController.text : null,
+              specialization:
+                  _role == 'Doctor' ? _specializationController.text : null,
+              clinicName: _role == 'Doctor' ? _clinicController.text : null,
+            );
+
+    if (!mounted) return;
+    setState(() => _submitting = false);
+
+    if (response == null) return;
+
+    if (response.requiresApproval) {
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('تم إرسال طلبك'),
+          content: const Text(
+            'تم إنشاء حساب الطبيب بنجاح، وسيصبح تسجيل الدخول متاحًا بعد موافقة الإدارة.',
+          ),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('حسنًا'),
+            ),
+          ],
+        ),
+      );
+      if (mounted) context.go('/login');
+      return;
+    }
+
+    if (response.authentication != null && mounted) {
+      context.go('/home');
+    }
+  }
+}
+).hasMatch(value)) {
+                                return 'كلمة المرور يجب أن تكون من 6 إلى 15 رقمًا فقط.';
                               }
                               return null;
                             },
