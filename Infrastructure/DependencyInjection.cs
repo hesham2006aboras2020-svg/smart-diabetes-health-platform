@@ -42,15 +42,17 @@ public static class DependencyInjection
         services.AddIdentityCore<Domain.Entities.User>(options =>
         {
             options.User.RequireUniqueEmail = true;
-            options.Password.RequiredLength = 8;
+            options.Password.RequiredLength = 6;
             options.Password.RequireDigit = true;
-            options.Password.RequireUppercase = true;
-            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireLowercase = false;
             options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredUniqueChars = 1;
         })
         .AddRoles<IdentityRole<Guid>>()
         .AddEntityFrameworkStores<DiabetesDbContext>()
-        .AddDefaultTokenProviders();
+        .AddDefaultTokenProviders()
+        .AddPasswordValidator<NumericPasswordValidator<Domain.Entities.User>>();
 
         return services;
     }
