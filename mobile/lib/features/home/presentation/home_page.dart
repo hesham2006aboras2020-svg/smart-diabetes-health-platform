@@ -52,7 +52,7 @@ class _PatientHomeState extends State<_PatientHome> {
     final wide = MediaQuery.sizeOf(context).width >= 900;
 
     return Scaffold(
-      appBar: AppBar(
+      appBar: _index == 0 ? AppBar(
         titleSpacing: 18,
         title: Row(
           children: [
@@ -126,7 +126,7 @@ class _PatientHomeState extends State<_PatientHome> {
           ),
           const SizedBox(width: 6),
         ],
-      ),
+      ) : null,
       body: Row(
         children: [
           if (wide)
