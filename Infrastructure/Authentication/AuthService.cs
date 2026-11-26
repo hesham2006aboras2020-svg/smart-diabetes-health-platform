@@ -29,11 +29,23 @@ public sealed class AuthService(
         if (role == Role.Doctor && string.IsNullOrWhiteSpace(request.LicenseNumber))
             throw new InvalidOperationException("Doctor license number is required.");
 
+        var phoneNumber = NormalizePhoneNumber(request.PhoneNumber);
+        if (!IsValidPhoneNumber(phoneNumber))
+            throw new InvalidOperationException("A valid phone number is required.");
+
+        if (await db.Users.AnyAsync(x => x.PhoneNumber == phoneNumber, cancellationToken))
+            throw new InvalidOperationException("This phone number is already registered.");
+
+        var email = request.Email.Trim().ToLowerInvariant();
+        if (await db.Users.AnyAsync(x => x.Email == email, cancellationToken))
+            throw new InvalidOperationException("This email is already registered.");
+
         var user = new User
         {
             Id = Guid.NewGuid(),
-            UserName = request.Email.Trim().ToLowerInvariant(),
-            Email = request.Email.Trim().ToLowerInvariant(),
+            UserName = email,
+            Email = email,
+            PhoneNumber = phoneNumber,
             FullName = request.FullName.Trim(),
             Role = role,
             AccountStatus = role == Role.Doctor ? AccountStatus.Pending : AccountStatus.Active,
@@ -92,11 +104,22 @@ public sealed class AuthService(
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
-        var username = request.Username.Trim();
-        var user = await userManager.FindByNameAsync(username)
-            ?? await userManager.FindByEmailAsync(username);
+        var identifier = request.Username.Trim();
+        var normalizedPhone = NormalizePhoneNumber(identifier);
+
+        User? user = null;
+        if (IsValidPhoneNumber(normalizedPhone))
+        {
+            user = await db.Users.SingleOrDefaultAsync(
+                x => x.PhoneNumber == normalizedPhone,
+                cancellationToken);
+        }
+
+        user ??= await userManager.FindByNameAsync(identifier)
+            ?? await userManager.FindByEmailAsync(identifier);
+
         if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
-            throw new UnauthorizedAccessException("Invalid email or password.");
+            throw new UnauthorizedAccessException("Invalid phone number or password.");
 
         if (user.AccountStatus != AccountStatus.Active)
             throw new UnauthorizedAccessException("This account is not active.");
@@ -168,6 +191,26 @@ public sealed class AuthService(
             user.Role.ToString(),
             user.AccountStatus.ToString());
     }
+
+    private static string NormalizePhoneNumber(string value)
+    {
+        var trimmed = value.Trim();
+        var builder = new StringBuilder(trimmed.Length);
+
+        foreach (var character in trimmed)
+        {
+            if (char.IsDigit(character))
+                builder.Append(character);
+            else if (character == '+' && builder.Length == 0)
+                builder.Append(character);
+        }
+
+        return builder.ToString();
+    }
+
+    private static bool IsValidPhoneNumber(string value) =>
+        System.Text.RegularExpressions.Regex.IsMatch(value, @"^\+?[1-9]\d{7,14}$");
+
     private static string HashRefreshToken(string token)
     {
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(token));
