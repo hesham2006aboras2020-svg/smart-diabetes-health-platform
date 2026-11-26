@@ -10,6 +10,7 @@ From the repository root, configure secrets for the API project:
 dotnet user-secrets --project API set "Jwt:Key" "replace-with-a-random-secret-at-least-32-characters"
 dotnet user-secrets --project API set "AdminSeed:Username" "admin"
 dotnet user-secrets --project API set "AdminSeed:Email" "admin@example.local"
+dotnet user-secrets --project API set "AdminSeed:PhoneNumber" "+9677XXXXXXXX"
 dotnet user-secrets --project API set "AdminSeed:FullName" "System Administrator"
 dotnet user-secrets --project API set "AdminSeed:Password" "replace-with-a-strong-password"
 ```
@@ -23,6 +24,7 @@ For containers, CI/CD, or hosted environments, use environment variables instead
 - `Jwt__Key`
 - `AdminSeed__Username`
 - `AdminSeed__Email`
+- `AdminSeed__PhoneNumber`
 - `AdminSeed__FullName`
 - `AdminSeed__Password`
 

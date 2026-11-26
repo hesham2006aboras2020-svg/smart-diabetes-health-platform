@@ -1,5 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'auth_controller.dart';
 
@@ -14,6 +15,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _licenseController = TextEditingController();
   final _specializationController = TextEditingController();
@@ -27,6 +29,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   void dispose() {
     _fullNameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _licenseController.dispose();
     _specializationController.dispose();
@@ -36,210 +39,244 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final auth = ref.watch(authControllerProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('إنشاء حساب')),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'ابدأ باستخدام منصة السكري الذكية',
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'اختر نوع الحساب وأدخل بياناتك الأساسية.',
-                    ),
-                    const SizedBox(height: 24),
-                    SegmentedButton<String>(
-                      segments: const [
-                        ButtonSegment(
-                          value: 'Patient',
-                          label: Text('مريض'),
-                          icon: Icon(Icons.person_outline),
-                        ),
-                        ButtonSegment(
-                          value: 'Doctor',
-                          label: Text('طبيب'),
-                          icon: Icon(Icons.medical_services_outlined),
-                        ),
-                      ],
-                      selected: {_role},
-                      onSelectionChanged: _submitting
-                          ? null
-                          : (selection) =>
-                              setState(() => _role = selection.first),
-                    ),
-                    const SizedBox(height: 20),
-                    TextFormField(
-                      controller: _fullNameController,
-                      minLines: 1,
-                      maxLines: 1,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        labelText: 'الاسم الكامل',
-                        prefixIcon: Icon(Icons.badge_outlined),
-                      ),
-                      validator: (value) =>
-                          value == null || value.trim().isEmpty
-                              ? 'أدخل الاسم الكامل.'
-                              : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _emailController,
-                      minLines: 1,
-                      maxLines: 1,
-                      keyboardType: TextInputType.emailAddress,
-                      textDirection: TextDirection.ltr,
-                      textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        labelText: 'البريد الإلكتروني',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: (value) {
-                        final email = value?.trim() ?? '';
-                        if (email.isEmpty) return 'أدخل البريد الإلكتروني.';
-                        if (!email.contains('@') || !email.contains('.')) {
-                          return 'أدخل بريدًا إلكترونيًا صحيحًا.';
-                        }
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _passwordController,
-                      minLines: 1,
-                      maxLines: 1,
-                      obscureText: _obscurePassword,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        labelText: 'كلمة المرور',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          tooltip: _obscurePassword
-                              ? 'إظهار كلمة المرور'
-                              : 'إخفاء كلمة المرور',
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'أدخل كلمة المرور.';
-                        }
-                        if (value.length < 8) {
-                          return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
-                        }
-                        if (!RegExp(r'[A-Z]').hasMatch(value) ||
-                            !RegExp(r'[a-z]').hasMatch(value) ||
-                            !RegExp(r'[0-9]').hasMatch(value)) {
-                          return 'استخدم حرفًا كبيرًا وصغيرًا ورقمًا.';
-                        }
-                        return null;
-                      },
-                    ),
-                    if (_role == 'Doctor') ...[
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _licenseController,
-                        minLines: 1,
-                        maxLines: 1,
-                        textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          labelText: 'رقم الترخيص الطبي',
-                          prefixIcon: Icon(Icons.verified_user_outlined),
-                        ),
-                        validator: (value) =>
-                            _role == 'Doctor' &&
-                                    (value == null || value.trim().isEmpty)
-                                ? 'رقم الترخيص الطبي مطلوب للطبيب.'
-                                : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _specializationController,
-                        minLines: 1,
-                        maxLines: 1,
-                        textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          labelText: 'التخصص الطبي (اختياري)',
-                          prefixIcon: Icon(Icons.local_hospital_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _clinicController,
-                        minLines: 1,
-                        maxLines: 1,
-                        textInputAction: TextInputAction.done,
-                        decoration: const InputDecoration(
-                        isDense: true,
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          labelText: 'اسم العيادة (اختياري)',
-                          prefixIcon: Icon(Icons.business_outlined),
-                        ),
-                      ),
-                    ],
-                    if (auth.message != null &&
-                        auth.status == AuthStatus.error) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        auth.message!,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _submitting ? null : _submit,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: _submitting
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
+              theme.scaffoldBackgroundColor,
+              Colors.white,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 560),
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(28, 28, 28, 26),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                tooltip: 'رجوع',
+                                onPressed: _submitting
+                                    ? null
+                                    : () => context.pop(),
+                                icon: const Icon(Icons.arrow_forward),
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'إنشاء حساب جديد',
+                                  style: theme.textTheme.headlineSmall?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
-                              )
-                            : const Text('إنشاء الحساب'),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'أنشئ حسابك وابدأ متابعة صحتك من مكان واحد.',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SegmentedButton<String>(
+                            segments: const [
+                              ButtonSegment(
+                                value: 'Patient',
+                                label: Text('مريض'),
+                                icon: Icon(Icons.person_outline),
+                              ),
+                              ButtonSegment(
+                                value: 'Doctor',
+                                label: Text('طبيب'),
+                                icon: Icon(Icons.medical_services_outlined),
+                              ),
+                            ],
+                            selected: {_role},
+                            onSelectionChanged: _submitting
+                                ? null
+                                : (selection) =>
+                                    setState(() => _role = selection.first),
+                          ),
+                          const SizedBox(height: 20),
+                          _field(
+                            controller: _fullNameController,
+                            label: 'الاسم الكامل',
+                            icon: Icons.badge_outlined,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) =>
+                                value == null || value.trim().isEmpty
+                                    ? 'أدخل الاسم الكامل.'
+                                    : null,
+                          ),
+                          const SizedBox(height: 14),
+                          _field(
+                            controller: _phoneController,
+                            label: 'رقم الهاتف',
+                            hint: '+967 7XXXXXXXX',
+                            icon: Icons.phone_outlined,
+                            keyboardType: TextInputType.phone,
+                            direction: TextDirection.ltr,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              final phone = value?.trim() ?? '';
+                              final normalized = phone.replaceAll(
+                                RegExp(r'[^+0-9]'),
+                                '',
+                              );
+                              if (normalized.isEmpty) {
+                                return 'أدخل رقم الهاتف.';
+                              }
+                              if (!RegExp(r'^\+?[1-9]\d{7,14}$')
+                                  .hasMatch(normalized)) {
+                                return 'أدخل رقم هاتف صحيحًا بصيغة دولية.';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          _field(
+                            controller: _emailController,
+                            label: 'البريد الإلكتروني',
+                            icon: Icons.email_outlined,
+                            keyboardType: TextInputType.emailAddress,
+                            direction: TextDirection.ltr,
+                            textInputAction: TextInputAction.next,
+                            validator: (value) {
+                              final email = value?.trim() ?? '';
+                              if (email.isEmpty) return 'أدخل البريد الإلكتروني.';
+                              if (!email.contains('@') || !email.contains('.')) {
+                                return 'أدخل بريدًا إلكترونيًا صحيحًا.';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
+                          TextFormField(
+                            controller: _passwordController,
+                            minLines: 1,
+                            maxLines: 1,
+                            obscureText: _obscurePassword,
+                            textInputAction: TextInputAction.next,
+                            decoration: InputDecoration(
+                              labelText: 'كلمة المرور',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                tooltip: _obscurePassword
+                                    ? 'إظهار كلمة المرور'
+                                    : 'إخفاء كلمة المرور',
+                                onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword,
+                                ),
+                                icon: Icon(
+                                  _obscurePassword
+                                      ? Icons.visibility_outlined
+                                      : Icons.visibility_off_outlined,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'أدخل كلمة المرور.';
+                              }
+                              if (value.length < 8) {
+                                return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
+                              }
+                              if (!RegExp(r'[A-Z]').hasMatch(value) ||
+                                  !RegExp(r'[a-z]').hasMatch(value) ||
+                                  !RegExp(r'[0-9]').hasMatch(value)) {
+                                return 'استخدم حرفًا كبيرًا وصغيرًا ورقمًا.';
+                              }
+                              return null;
+                            },
+                          ),
+                          if (_role == 'Doctor') ...[
+                            const SizedBox(height: 14),
+                            _field(
+                              controller: _licenseController,
+                              label: 'رقم الترخيص الطبي',
+                              icon: Icons.verified_user_outlined,
+                              textInputAction: TextInputAction.next,
+                              validator: (value) =>
+                                  value == null || value.trim().isEmpty
+                                      ? 'رقم الترخيص الطبي مطلوب للطبيب.'
+                                      : null,
+                            ),
+                            const SizedBox(height: 14),
+                            _field(
+                              controller: _specializationController,
+                              label: 'التخصص الطبي (اختياري)',
+                              icon: Icons.local_hospital_outlined,
+                              textInputAction: TextInputAction.next,
+                            ),
+                            const SizedBox(height: 14),
+                            _field(
+                              controller: _clinicController,
+                              label: 'اسم العيادة (اختياري)',
+                              icon: Icons.business_outlined,
+                              textInputAction: TextInputAction.done,
+                            ),
+                          ],
+                          if (auth.message != null &&
+                              auth.status == AuthStatus.error) ...[
+                            const SizedBox(height: 14),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.errorContainer,
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Text(
+                                auth.message!,
+                                style: TextStyle(
+                                  color: theme.colorScheme.onErrorContainer,
+                                ),
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 22),
+                          FilledButton.icon(
+                            onPressed: _submitting ? null : _submit,
+                            icon: _submitting
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.person_add_alt_1),
+                            label: Text(
+                              _submitting ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب',
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          TextButton(
+                            onPressed: _submitting ? null : () => context.go('/login'),
+                            child: const Text('لديك حساب؟ تسجيل الدخول'),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: _submitting
-                          ? null
-                          : () => Navigator.of(context).pop(),
-                      child: const Text('لديك حساب؟ تسجيل الدخول'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -249,21 +286,50 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 
+  Widget _field({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? hint,
+    TextInputType? keyboardType,
+    TextDirection? direction,
+    TextInputAction? textInputAction,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      minLines: 1,
+      maxLines: 1,
+      keyboardType: keyboardType,
+      textDirection: direction,
+      textInputAction: textInputAction,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: Icon(icon),
+      ),
+      validator: validator,
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _submitting = true);
-    final response = await ref.read(authControllerProvider.notifier).register(
-          fullName: _fullNameController.text,
-          email: _emailController.text,
-          password: _passwordController.text,
-          role: _role,
-          licenseNumber:
-              _role == 'Doctor' ? _licenseController.text : null,
-          specialization:
-              _role == 'Doctor' ? _specializationController.text : null,
-          clinicName: _role == 'Doctor' ? _clinicController.text : null,
-        );
+    final response =
+        await ref.read(authControllerProvider.notifier).register(
+              fullName: _fullNameController.text,
+              email: _emailController.text,
+              phoneNumber: _phoneController.text,
+              password: _passwordController.text,
+              role: _role,
+              licenseNumber:
+                  _role == 'Doctor' ? _licenseController.text : null,
+              specialization:
+                  _role == 'Doctor' ? _specializationController.text : null,
+              clinicName: _role == 'Doctor' ? _clinicController.text : null,
+            );
+
     if (!mounted) return;
     setState(() => _submitting = false);
 
@@ -285,12 +351,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           ],
         ),
       );
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) context.go('/login');
       return;
     }
 
     if (response.authentication != null && mounted) {
-      Navigator.of(context).pop();
+      context.go('/home');
     }
   }
 }

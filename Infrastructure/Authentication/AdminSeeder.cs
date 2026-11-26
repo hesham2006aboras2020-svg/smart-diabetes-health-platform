@@ -1,3 +1,4 @@
+using System.Text;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -14,14 +15,19 @@ public sealed class AdminSeeder(
     {
         var username = configuration["AdminSeed:Username"]?.Trim();
         var email = configuration["AdminSeed:Email"]?.Trim().ToLowerInvariant();
+        var phoneNumber = NormalizePhoneNumber(configuration["AdminSeed:PhoneNumber"]);
         var password = configuration["AdminSeed:Password"];
         var fullName = configuration["AdminSeed:FullName"]?.Trim();
 
         if (string.IsNullOrWhiteSpace(username) ||
             string.IsNullOrWhiteSpace(email) ||
+            string.IsNullOrWhiteSpace(phoneNumber) ||
             string.IsNullOrWhiteSpace(password) ||
             string.IsNullOrWhiteSpace(fullName))
             return;
+
+        if (!System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\+?[1-9]\d{7,14}$"))
+            throw new InvalidOperationException("Configured admin phone number is invalid.");
 
         if (!await roleManager.RoleExistsAsync(Role.Admin.ToString()))
         {
@@ -38,6 +44,15 @@ public sealed class AdminSeeder(
         {
             if (existing.Role != Role.Admin)
                 throw new InvalidOperationException("Configured admin username belongs to a non-admin account.");
+
+            if (string.IsNullOrWhiteSpace(existing.PhoneNumber))
+            {
+                existing.PhoneNumber = phoneNumber;
+                var updateResult = await userManager.UpdateAsync(existing);
+                if (!updateResult.Succeeded)
+                    throw new InvalidOperationException(
+                        string.Join("; ", updateResult.Errors.Select(x => x.Description)));
+            }
 
             if (!await userManager.IsInRoleAsync(existing, Role.Admin.ToString()))
             {
@@ -56,6 +71,7 @@ public sealed class AdminSeeder(
             UserName = username,
             Email = email,
             EmailConfirmed = true,
+            PhoneNumber = phoneNumber,
             FullName = fullName,
             Role = Role.Admin,
             AccountStatus = AccountStatus.Active,
@@ -71,5 +87,22 @@ public sealed class AdminSeeder(
         if (!roleAssignment.Succeeded)
             throw new InvalidOperationException(
                 string.Join("; ", roleAssignment.Errors.Select(x => x.Description)));
+    }
+
+    private static string NormalizePhoneNumber(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return string.Empty;
+
+        var builder = new StringBuilder(value.Trim().Length);
+        foreach (var character in value.Trim())
+        {
+            if (char.IsDigit(character))
+                builder.Append(character);
+            else if (character == '+' && builder.Length == 0)
+                builder.Append(character);
+        }
+
+        return builder.ToString();
     }
 }

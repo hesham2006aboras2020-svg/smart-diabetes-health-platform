@@ -7,12 +7,12 @@ class AuthRepository {
   final ApiClient _client;
 
   Future<AuthResponse> login({
-    required String username,
+    required String phoneNumber,
     required String password,
   }) async {
     final response = await _client.dio.post<Map<String, dynamic>>(
       '/api/auth/login',
-      data: {'username': username, 'password': password},
+      data: {'username': phoneNumber.trim(), 'password': password},
     );
     return AuthResponse.fromJson(response.data!);
   }
@@ -20,6 +20,7 @@ class AuthRepository {
   Future<RegisterResponse> register({
     required String fullName,
     required String email,
+    required String phoneNumber,
     required String password,
     required String role,
     String? licenseNumber,
@@ -31,6 +32,7 @@ class AuthRepository {
       data: {
         'fullName': fullName.trim(),
         'email': email.trim(),
+        'phoneNumber': phoneNumber.trim(),
         'password': password,
         'role': role,
         if (licenseNumber != null && licenseNumber.trim().isNotEmpty)

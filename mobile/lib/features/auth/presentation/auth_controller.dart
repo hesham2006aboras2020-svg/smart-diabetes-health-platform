@@ -84,11 +84,11 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<void> login(String username, String password) async {
+  Future<void> login(String phoneNumber, String password) async {
     state = const AuthState(status: AuthStatus.loading);
     try {
       final response = await _repository.login(
-        username: username.trim(),
+        phoneNumber: phoneNumber.trim(),
         password: password,
       );
       await _session.save(response);
@@ -107,6 +107,7 @@ class AuthController extends Notifier<AuthState> {
   Future<RegisterResponse?> register({
     required String fullName,
     required String email,
+    required String phoneNumber,
     required String password,
     required String role,
     String? licenseNumber,
@@ -118,6 +119,7 @@ class AuthController extends Notifier<AuthState> {
       final response = await _repository.register(
         fullName: fullName,
         email: email,
+        phoneNumber: phoneNumber,
         password: password,
         role: role,
         licenseNumber: licenseNumber,
