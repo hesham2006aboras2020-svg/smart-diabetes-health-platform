@@ -1,5 +1,4 @@
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:material_ui/material_ui.dart' hide GlobalMaterialLocalizations;
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -140,11 +139,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
       ),
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       routerConfig: _router,
     );
   }
