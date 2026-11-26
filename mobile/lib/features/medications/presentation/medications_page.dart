@@ -2,7 +2,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/auth_controller.dart';
-import '../../core/widgets/app_states.dart';
+import '../../../core/widgets/app_states.dart';
 import '../data/medication_repository.dart';
 
 final medicationRepositoryProvider =
