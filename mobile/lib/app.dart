@@ -20,7 +20,7 @@ class DiabetesApp extends ConsumerStatefulWidget {
 class _DiabetesAppState extends ConsumerState<DiabetesApp> {
   late GoRouter _router;
   late AuthStatus _authStatus;
-  String? _role;
+  final ValueNotifier<int> _routerRefresh = ValueNotifier<int>(0);
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
 
     _router = GoRouter(
       initialLocation: '/',
-      refreshListenable: _RouterRefresh(ref),
+      refreshListenable: _routerRefresh,
       redirect: (context, state) {
         final isPublicRoute = state.matchedLocation == '/' ||
             state.matchedLocation == '/login' ||
@@ -69,13 +69,14 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
     ref.listenManual<AuthState>(authControllerProvider, (_, next) {
       _authStatus = next.status;
       _role = next.role;
-      _router.refresh();
+      _routerRefresh.value++;
     });
   }
 
   @override
   void dispose() {
     _router.dispose();
+    _routerRefresh.dispose();
     super.dispose();
   }
 
@@ -152,26 +153,3 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
   }
 }
 
-class _RouterRefresh extends ChangeNotifier {
-  _RouterRefresh(this.ref) {
-    _removeListener = ref.listenManual<AuthState>(
-      authControllerProvider,
-      (_, next) {
-        _status = next.status;
-        _role = next.role;
-        notifyListeners();
-      },
-    );
-  }
-
-  final Ref ref;
-  late final void Function() _removeListener;
-  AuthStatus _status = AuthStatus.loading;
-  String? _role;
-
-  @override
-  void dispose() {
-    _removeListener();
-    super.dispose();
-  }
-}
