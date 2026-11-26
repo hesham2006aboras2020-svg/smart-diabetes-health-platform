@@ -90,12 +90,14 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         scaffoldBackgroundColor: const Color(0xFFF4F8F8),
         fontFamily: 'Arial',
         visualDensity: VisualDensity.standard,
+        textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Arial'),
         appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: 0,
           scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
+          titleTextStyle: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Color(0xFF102A2A)),
         ),
         cardTheme: CardThemeData(
           elevation: 0,
@@ -137,7 +139,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         ),
         filledButtonTheme: FilledButtonThemeData(
           style: FilledButton.styleFrom(
-            minimumSize: const Size.fromHeight(54),
+            minimumSize: const Size.fromHeight(50),
             padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(17),
@@ -147,7 +149,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         ),
         outlinedButtonTheme: OutlinedButtonThemeData(
           style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
+            minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(17),
             ),
@@ -163,11 +165,11 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         ),
         navigationBarTheme: NavigationBarThemeData(
           elevation: 2,
-          height: 72,
+          height: 68,
           backgroundColor: Colors.white,
           indicatorColor: const Color(0x220B7A75),
-          labelTextStyle: WidgetStatePropertyAll(
-            TextStyle(fontWeight: FontWeight.w700),
+          labelTextStyle: const WidgetStatePropertyAll(
+            TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
           ),
         ),
         dividerTheme: const DividerThemeData(
