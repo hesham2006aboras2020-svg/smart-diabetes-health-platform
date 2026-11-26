@@ -88,7 +88,7 @@ class PatientDashboardPage extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 24),
-          Text('أحدث القراءات', style: Theme.of(context).textTheme.titleLarge),, style: Theme.of(context).textTheme.titleLarge),
+          Text('أحدث القراءات', style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 8),
           if (state.readings.isEmpty)
             const Card(
