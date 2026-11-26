@@ -27,7 +27,7 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
 
 final sessionManagerProvider = Provider<SessionManager>((ref) {
   return SessionManager(
-    ref.watch(secureStorageProvider),
+    SecureSessionStorage(ref.watch(secureStorageProvider)),
     baseUrl: AppConfig.apiBaseUrl,
   );
 });
@@ -84,14 +84,18 @@ class AuthController extends Notifier<AuthState> {
     }
   }
 
-  Future<void> login(String phoneNumber, String password) async {
+  Future<void> login(
+    String phoneNumber,
+    String password, {
+    bool rememberMe = false,
+  }) async {
     state = const AuthState(status: AuthStatus.loading);
     try {
       final response = await _repository.login(
         phoneNumber: phoneNumber.trim(),
         password: password,
       );
-      await _session.save(response);
+      await _session.save(response, rememberMe: rememberMe);
       state = AuthState(
         status: AuthStatus.authenticated,
         role: response.role,
@@ -106,7 +110,6 @@ class AuthController extends Notifier<AuthState> {
 
   Future<RegisterResponse?> register({
     required String fullName,
-    required String email,
     required String phoneNumber,
     required String password,
     required String role,
@@ -118,7 +121,6 @@ class AuthController extends Notifier<AuthState> {
     try {
       final response = await _repository.register(
         fullName: fullName,
-        email: email,
         phoneNumber: phoneNumber,
         password: password,
         role: role,

@@ -12,14 +12,13 @@ class AuthRepository {
   }) async {
     final response = await _client.dio.post<Map<String, dynamic>>(
       '/api/auth/login',
-      data: {'username': phoneNumber.trim(), 'password': password},
+      data: {'phoneNumber': phoneNumber.trim(), 'password': password},
     );
     return AuthResponse.fromJson(response.data!);
   }
 
   Future<RegisterResponse> register({
     required String fullName,
-    required String email,
     required String phoneNumber,
     required String password,
     required String role,
@@ -31,7 +30,6 @@ class AuthRepository {
       '/api/auth/register',
       data: {
         'fullName': fullName.trim(),
-        'email': email.trim(),
         'phoneNumber': phoneNumber.trim(),
         'password': password,
         'role': role,

@@ -33,6 +33,10 @@ public class DiabetesDbContext(DbContextOptions<DiabetesDbContext> options) : Id
             e.Property(x => x.Email).HasMaxLength(256).IsRequired();
             e.Property(x => x.UserName).HasMaxLength(256);
             e.HasIndex(x => x.Email).IsUnique();
+            e.Property(x => x.PhoneNumber).HasMaxLength(32);
+            e.HasIndex(x => x.PhoneNumber)
+                .IsUnique()
+                .HasFilter("[PhoneNumber] IS NOT NULL AND [PhoneNumber] <> N''");
             e.Property(x => x.Role).HasConversion<string>().HasMaxLength(20);
             e.Property(x => x.AccountStatus).HasConversion<string>().HasMaxLength(20);
         });

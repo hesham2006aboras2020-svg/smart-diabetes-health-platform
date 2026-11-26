@@ -84,49 +84,56 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0B7A75),
-          brightness: Brightness.light,
+          seedColor: const Color(0xFF45C6B7),
+          brightness: Brightness.dark,
+          surface: const Color(0xFF132426),
         ),
-        scaffoldBackgroundColor: const Color(0xFFF4F8F8),
+        scaffoldBackgroundColor: const Color(0xFF0B1719),
         fontFamily: 'Arial',
         visualDensity: VisualDensity.standard,
-        textTheme: ThemeData.light().textTheme.apply(fontFamily: 'Arial'),
+        textTheme: ThemeData.dark().textTheme.apply(fontFamily: 'Arial'),
         appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: 0,
           scrolledUnderElevation: 0,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
-          titleTextStyle: TextStyle(fontWeight: FontWeight.w900, fontSize: 20, color: Color(0xFF102A2A)),
+          titleTextStyle: TextStyle(
+            fontWeight: FontWeight.w900,
+            fontSize: 20,
+            color: Color(0xFFF3FBFA),
+          ),
         ),
         cardTheme: CardThemeData(
-          elevation: 0,
+          elevation: 1,
           margin: EdgeInsets.zero,
-          color: Colors.white,
+          color: const Color(0xFF192B2D),
+          shadowColor: const Color(0x66000000),
           surfaceTintColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(24)),
-            side: BorderSide(color: Color(0x120B7A75)),
+            side: BorderSide(color: Color(0x2A45C6B7)),
           ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: Colors.white,
+          fillColor: const Color(0xFF142729),
           isDense: true,
           contentPadding: const EdgeInsets.symmetric(horizontal: 17, vertical: 16),
-          prefixIconColor: const Color(0xFF0B7A75),
+          prefixIconColor: const Color(0xFF45C6B7),
+          suffixIconColor: const Color(0xFF9FB8B5),
           floatingLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(17)),
-            borderSide: BorderSide(color: Color(0x180B7A75)),
+            borderSide: BorderSide(color: Color(0x3A75A29C)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(17)),
-            borderSide: BorderSide(color: Color(0x180B7A75)),
+            borderSide: BorderSide(color: Color(0x3A75A29C)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(17)),
-            borderSide: BorderSide(color: Color(0xFF0B7A75), width: 1.6),
+            borderSide: BorderSide(color: Color(0xFF45C6B7), width: 1.6),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.all(Radius.circular(17)),
@@ -153,7 +160,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(17),
             ),
-            side: const BorderSide(color: Color(0x330B7A75)),
+            side: const BorderSide(color: Color(0x5575A29C)),
           ),
         ),
         chipTheme: ChipThemeData(
@@ -166,8 +173,8 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         navigationBarTheme: NavigationBarThemeData(
           elevation: 2,
           height: 68,
-          backgroundColor: Colors.white,
-          indicatorColor: const Color(0x220B7A75),
+          backgroundColor: const Color(0xFF102123),
+          indicatorColor: const Color(0x3345C6B7),
           labelTextStyle: const WidgetStatePropertyAll(
             TextStyle(fontWeight: FontWeight.w800, fontSize: 12),
           ),
@@ -175,7 +182,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         dividerTheme: const DividerThemeData(
           space: 1,
           thickness: 1,
-          color: Color(0x12000000),
+          color: Color(0x2A75A29C),
         ),
         snackBarTheme: SnackBarThemeData(
           behavior: SnackBarBehavior.floating,
@@ -186,7 +193,7 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
         ),
         dialogTheme: DialogThemeData(
           elevation: 0,
-          backgroundColor: Colors.white,
+          backgroundColor: const Color(0xFF192B2D),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
@@ -195,6 +202,10 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar'), Locale('en')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: child ?? const SizedBox.shrink(),
+      ),
       routerConfig: _router,
     );
   }

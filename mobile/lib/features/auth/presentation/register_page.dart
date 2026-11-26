@@ -14,7 +14,6 @@ class RegisterPage extends ConsumerStatefulWidget {
 class _RegisterPageState extends ConsumerState<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _fullNameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _licenseController = TextEditingController();
@@ -28,7 +27,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   void dispose() {
     _fullNameController.dispose();
-    _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
     _licenseController.dispose();
@@ -51,7 +49,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
             colors: [
               theme.colorScheme.primaryContainer.withValues(alpha: 0.7),
               theme.scaffoldBackgroundColor,
-              Colors.white,
+              const Color(0xFF102426),
             ],
           ),
         ),
@@ -137,32 +135,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             direction: TextDirection.ltr,
                             textInputAction: TextInputAction.next,
                             validator: (value) {
-                              final phone = value?.trim() ?? '';
-                              final normalized =
-                                  phone.replaceAll(RegExp(r'[^+0-9]'), '');
+                              var normalized = (value ?? '').replaceAll(
+                                RegExp(r'[\s()./-]'),
+                                '',
+                              );
+                              if (normalized.startsWith('+')) {
+                                normalized = normalized.substring(1);
+                              } else if (normalized.startsWith('00')) {
+                                normalized = normalized.substring(2);
+                              }
                               if (normalized.isEmpty) {
                                 return 'أدخل رقم الهاتف.';
                               }
-                              if (!RegExp(r'^\+?[1-9]\d{7,14}$')
-                                  .hasMatch(normalized)) {
+                              if (!RegExp(
+                                r'^[1-9]\d{7,14}$',
+                              ).hasMatch(normalized)) {
                                 return 'أدخل رقم هاتف صحيحًا بصيغة دولية.';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 14),
-                          _field(
-                            controller: _emailController,
-                            label: 'البريد الإلكتروني',
-                            icon: Icons.email_outlined,
-                            keyboardType: TextInputType.emailAddress,
-                            direction: TextDirection.ltr,
-                            textInputAction: TextInputAction.next,
-                            validator: (value) {
-                              final email = value?.trim() ?? '';
-                              if (email.isEmpty) return 'أدخل البريد الإلكتروني.';
-                              if (!email.contains('@') || !email.contains('.')) {
-                                return 'أدخل بريدًا إلكترونيًا صحيحًا.';
                               }
                               return null;
                             },
@@ -317,7 +305,6 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     final response =
         await ref.read(authControllerProvider.notifier).register(
               fullName: _fullNameController.text,
-              email: _emailController.text,
               phoneNumber: _phoneController.text,
               password: _passwordController.text,
               role: _role,

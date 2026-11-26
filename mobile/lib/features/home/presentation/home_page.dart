@@ -134,7 +134,7 @@ class _PatientHomeState extends State<_PatientHome> {
               selectedIndex: _index,
               onDestinationSelected: (value) => setState(() => _index = value),
               labelType: NavigationRailLabelType.all,
-              backgroundColor: Colors.white,
+              backgroundColor: const Color(0xFF102123),
               destinations: const [
                 NavigationRailDestination(
                   icon: Icon(Icons.home_outlined),

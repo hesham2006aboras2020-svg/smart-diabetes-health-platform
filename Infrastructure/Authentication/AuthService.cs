@@ -29,22 +29,18 @@ public sealed class AuthService(
         if (role == Role.Doctor && string.IsNullOrWhiteSpace(request.LicenseNumber))
             throw new InvalidOperationException("Doctor license number is required.");
 
-        var phoneNumber = NormalizePhoneNumber(request.PhoneNumber);
-        if (!IsValidPhoneNumber(phoneNumber))
+        var phoneNumber = PhoneNumberNormalizer.Normalize(request.PhoneNumber);
+        if (!PhoneNumberNormalizer.IsValid(phoneNumber))
             throw new InvalidOperationException("A valid phone number is required.");
 
         if (await db.Users.AnyAsync(x => x.PhoneNumber == phoneNumber, cancellationToken))
             throw new InvalidOperationException("This phone number is already registered.");
 
-        var email = request.Email.Trim().ToLowerInvariant();
-        if (await db.Users.AnyAsync(x => x.Email == email, cancellationToken))
-            throw new InvalidOperationException("This email is already registered.");
-
         var user = new User
         {
             Id = Guid.NewGuid(),
-            UserName = email,
-            Email = email,
+            UserName = phoneNumber,
+            Email = $"{Guid.NewGuid():N}@phone.invalid",
             PhoneNumber = phoneNumber,
             FullName = request.FullName.Trim(),
             Role = role,
@@ -104,19 +100,13 @@ public sealed class AuthService(
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
-        var identifier = request.Username.Trim();
-        var normalizedPhone = NormalizePhoneNumber(identifier);
+        var normalizedPhone = PhoneNumberNormalizer.Normalize(request.PhoneNumber);
+        if (!PhoneNumberNormalizer.IsValid(normalizedPhone))
+            throw new UnauthorizedAccessException("Invalid phone number or password.");
 
-        User? user = null;
-        if (IsValidPhoneNumber(normalizedPhone))
-        {
-            user = await db.Users.SingleOrDefaultAsync(
-                x => x.PhoneNumber == normalizedPhone,
-                cancellationToken);
-        }
-
-        user ??= await userManager.FindByNameAsync(identifier)
-            ?? await userManager.FindByEmailAsync(identifier);
+        var user = await db.Users.SingleOrDefaultAsync(
+            x => x.PhoneNumber == normalizedPhone,
+            cancellationToken);
 
         if (user is null || !await userManager.CheckPasswordAsync(user, request.Password))
             throw new UnauthorizedAccessException("Invalid phone number or password.");
@@ -156,13 +146,16 @@ public sealed class AuthService(
     {
         var email = user.Email ?? throw new InvalidOperationException("User email is required to issue a token.");
         var expires = DateTime.UtcNow.AddMinutes(_jwt.AccessTokenMinutes);
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, email),
             new Claim(ClaimTypes.Role, user.Role.ToString())
         };
+        if (!string.IsNullOrWhiteSpace(user.PhoneNumber))
+            claims.Add(new Claim(ClaimTypes.MobilePhone, user.PhoneNumber));
+
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
@@ -191,25 +184,6 @@ public sealed class AuthService(
             user.Role.ToString(),
             user.AccountStatus.ToString());
     }
-
-    private static string NormalizePhoneNumber(string value)
-    {
-        var trimmed = value.Trim();
-        var builder = new StringBuilder(trimmed.Length);
-
-        foreach (var character in trimmed)
-        {
-            if (char.IsDigit(character))
-                builder.Append(character);
-            else if (character == '+' && builder.Length == 0)
-                builder.Append(character);
-        }
-
-        return builder.ToString();
-    }
-
-    private static bool IsValidPhoneNumber(string value) =>
-        System.Text.RegularExpressions.Regex.IsMatch(value, @"^\+?[1-9]\d{7,14}$");
 
     private static string HashRefreshToken(string token)
     {

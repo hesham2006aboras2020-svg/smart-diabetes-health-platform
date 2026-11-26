@@ -20,6 +20,23 @@ if [[ -f "$ENV_FILE" ]]; then
   source "$ENV_FILE"
 fi
 
+if [[ "${1:-}" == "--api" ]]; then
+  if [[ -z "${ConnectionStrings__DefaultConnection:-}" ]]; then
+    echo "ConnectionStrings__DefaultConnection is missing from $ENV_FILE."
+    exit 1
+  fi
+  if [[ -z "${Jwt__Key:-}" ]]; then
+    echo "Jwt__Key is missing from $ENV_FILE."
+    exit 1
+  fi
+
+  export ConnectionStrings__DefaultConnection Jwt__Key
+  export ASPNETCORE_ENVIRONMENT="${ASPNETCORE_ENVIRONMENT:-Development}"
+  export ASPNETCORE_URLS="${ASPNETCORE_URLS:-http://0.0.0.0:5000}"
+  cd "$ROOT"
+  exec dotnet run --project API
+fi
+
 if [[ -z "${MSSQL_SA_PASSWORD:-}" ]]; then
   MSSQL_SA_PASSWORD="$(openssl rand -hex 16)A1!"
 fi
@@ -80,4 +97,4 @@ dotnet ef database update --project Infrastructure.csproj --startup-project ../A
 echo
 echo "SQL Server is running on localhost:1433."
 echo "Development connection settings are stored in $ENV_FILE and are ignored by Git."
-echo "For the API, run: source $ENV_FILE && dotnet run --project API"
+echo "For the API, run: bash scripts/start-codespaces-sqlserver.sh --api"

@@ -10,18 +10,26 @@ class SessionManager {
   static const refreshTokenKey = 'refresh_token';
   static const expiresAtKey = 'access_token_expires_at';
   static const roleKey = 'role';
+  static const rememberMeKey = 'remember_me';
 
-  final FlutterSecureStorage _storage;
+  final SessionStorage _storage;
   final String baseUrl;
+  String? _sessionRefreshToken;
 
-  Future<void> save(AuthResponse response) async {
+  Future<void> save(AuthResponse response, {bool rememberMe = true}) async {
+    _sessionRefreshToken = response.refreshToken;
     await _storage.write(key: accessTokenKey, value: response.accessToken);
-    await _storage.write(key: refreshTokenKey, value: response.refreshToken);
+    if (rememberMe) {
+      await _storage.write(key: refreshTokenKey, value: response.refreshToken);
+    } else {
+      await _storage.delete(key: refreshTokenKey);
+    }
     await _storage.write(
       key: expiresAtKey,
       value: response.accessTokenExpiresAt.toUtc().toIso8601String(),
     );
     await _storage.write(key: roleKey, value: response.role);
+    await _storage.write(key: rememberMeKey, value: rememberMe.toString());
   }
 
   Future<String?> accessToken() => _storage.read(key: accessTokenKey);
@@ -29,10 +37,17 @@ class SessionManager {
   Future<String?> role() => _storage.read(key: roleKey);
 
   Future<AuthResponse?> restore() async {
+    final rememberMe = await _storage.read(key: rememberMeKey);
+    if (rememberMe == 'false') {
+      await clear();
+      return null;
+    }
+
     final refreshToken = await _storage.read(key: refreshTokenKey);
     if (refreshToken == null || refreshToken.isEmpty) {
       return null;
     }
+    _sessionRefreshToken = refreshToken;
 
     final accessToken = await _storage.read(key: accessTokenKey);
     final expiresAtText = await _storage.read(key: expiresAtKey);
@@ -61,7 +76,8 @@ class SessionManager {
   }
 
   Future<AuthResponse> refresh() async {
-    final refreshToken = await _storage.read(key: refreshTokenKey);
+    final refreshToken =
+        _sessionRefreshToken ?? await _storage.read(key: refreshTokenKey);
     if (refreshToken == null || refreshToken.isEmpty) {
       throw StateError('No refresh token is available.');
     }
@@ -81,7 +97,8 @@ class SessionManager {
         data: {'refreshToken': refreshToken},
       );
       final auth = AuthResponse.fromJson(response.data!);
-      await save(auth);
+      final rememberMe = await _storage.read(key: rememberMeKey) != 'false';
+      await save(auth, rememberMe: rememberMe);
       return auth;
     } finally {
       client.close(force: true);
@@ -89,11 +106,35 @@ class SessionManager {
   }
 
   Future<void> clear() async {
+    _sessionRefreshToken = null;
     await _storage.delete(key: accessTokenKey);
     await _storage.delete(key: refreshTokenKey);
     await _storage.delete(key: expiresAtKey);
     await _storage.delete(key: roleKey);
+    await _storage.delete(key: rememberMeKey);
   }
+}
+
+abstract interface class SessionStorage {
+  Future<String?> read({required String key});
+  Future<void> write({required String key, required String value});
+  Future<void> delete({required String key});
+}
+
+class SecureSessionStorage implements SessionStorage {
+  SecureSessionStorage(this._storage);
+
+  final FlutterSecureStorage _storage;
+
+  @override
+  Future<String?> read({required String key}) => _storage.read(key: key);
+
+  @override
+  Future<void> write({required String key, required String value}) =>
+      _storage.write(key: key, value: value);
+
+  @override
+  Future<void> delete({required String key}) => _storage.delete(key: key);
 }
 
 class ApiClient {

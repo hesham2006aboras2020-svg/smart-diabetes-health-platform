@@ -1,4 +1,3 @@
-using System.Text;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
@@ -15,7 +14,7 @@ public sealed class AdminSeeder(
     {
         var username = configuration["AdminSeed:Username"]?.Trim();
         var email = configuration["AdminSeed:Email"]?.Trim().ToLowerInvariant();
-        var phoneNumber = NormalizePhoneNumber(configuration["AdminSeed:PhoneNumber"]);
+        var phoneNumber = PhoneNumberNormalizer.Normalize(configuration["AdminSeed:PhoneNumber"]);
         var password = configuration["AdminSeed:Password"];
         var fullName = configuration["AdminSeed:FullName"]?.Trim();
 
@@ -26,7 +25,7 @@ public sealed class AdminSeeder(
             string.IsNullOrWhiteSpace(fullName))
             return;
 
-        if (!System.Text.RegularExpressions.Regex.IsMatch(phoneNumber, @"^\+?[1-9]\d{7,14}$"))
+        if (!PhoneNumberNormalizer.IsValid(phoneNumber))
             throw new InvalidOperationException("Configured admin phone number is invalid.");
 
         if (!await roleManager.RoleExistsAsync(Role.Admin.ToString()))
@@ -87,22 +86,5 @@ public sealed class AdminSeeder(
         if (!roleAssignment.Succeeded)
             throw new InvalidOperationException(
                 string.Join("; ", roleAssignment.Errors.Select(x => x.Description)));
-    }
-
-    private static string NormalizePhoneNumber(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return string.Empty;
-
-        var builder = new StringBuilder(value.Trim().Length);
-        foreach (var character in value.Trim())
-        {
-            if (char.IsDigit(character))
-                builder.Append(character);
-            else if (character == '+' && builder.Length == 0)
-                builder.Append(character);
-        }
-
-        return builder.ToString();
     }
 }

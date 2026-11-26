@@ -1,8 +1,14 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'auth_controller.dart';
+
+final Uri whatsappChatUri =
+    Uri.parse('https://wa.me/967739303311');
+const String phoneDialDestination = '+697772106560';
+final Uri phoneDialUri = Uri(scheme: 'tel', path: phoneDialDestination);
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -14,6 +20,8 @@ class LoginPage extends ConsumerStatefulWidget {
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _rememberMe = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -37,7 +45,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             colors: [
               theme.colorScheme.primaryContainer.withValues(alpha: 0.75),
               theme.scaffoldBackgroundColor,
-              Colors.white,
+              const Color(0xFF102426),
             ],
           ),
         ),
@@ -104,12 +112,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           controller: _passwordController,
                           minLines: 1,
                           maxLines: 1,
-                          obscureText: true,
-                          decoration: const InputDecoration(
+                          obscureText: _obscurePassword,
+                          decoration: InputDecoration(
                             labelText: 'كلمة المرور',
-                            prefixIcon: Icon(Icons.lock_outline),
+                            prefixIcon: const Icon(Icons.lock_outline),
+                            suffixIcon: IconButton(
+                              tooltip: _obscurePassword
+                                  ? 'إظهار كلمة المرور'
+                                  : 'إخفاء كلمة المرور',
+                              onPressed: () => setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              ),
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                              ),
+                            ),
                           ),
                           onSubmitted: (_) => _submit(),
+                        ),
+                        const SizedBox(height: 8),
+                        CheckboxListTile(
+                          value: _rememberMe,
+                          onChanged: loading
+                              ? null
+                              : (value) => setState(
+                                    () => _rememberMe = value ?? false,
+                                  ),
+                          title: const Text('تذكرني'),
+                          contentPadding: EdgeInsets.zero,
+                          controlAffinity: ListTileControlAffinity.leading,
+                          dense: true,
                         ),
                         if (auth.message != null) ...[
                           const SizedBox(height: 14),
@@ -144,6 +178,49 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           onPressed: loading ? null : () => context.push('/register'),
                           child: const Text('ليس لديك حساب؟ إنشاء حساب'),
                         ),
+                        const SizedBox(height: 10),
+                        const Divider(height: 1),
+                        const SizedBox(height: 12),
+                        Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _openWhatsApp(context),
+                                  icon: const Icon(
+                                    Icons.chat_bubble_outline_rounded,
+                                    size: 20,
+                                  ),
+                                  label: const Text('تواصل معنا'),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor:
+                                        const Color(0xFF1F8A3B),
+                                    minimumSize: const Size.fromHeight(48),
+                                    side: BorderSide(
+                                      color: const Color(0xFF1F8A3B)
+                                          .withValues(alpha: 0.55),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => _openPhoneDialer(context),
+                                  icon: const Icon(
+                                    Icons.phone_outlined,
+                                    size: 20,
+                                  ),
+                                  label: const Text('اتصل بنا'),
+                                  style: OutlinedButton.styleFrom(
+                                    minimumSize: const Size.fromHeight(48),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -167,6 +244,48 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       return;
     }
 
-    await ref.read(authControllerProvider.notifier).login(phone, password);
+    await ref
+        .read(authControllerProvider.notifier)
+        .login(phone, password, rememberMe: _rememberMe);
+  }
+
+  Future<void> _openWhatsApp(BuildContext context) async {
+    await _launchExternalUri(
+      context,
+      whatsappChatUri,
+      'تعذر فتح واتساب.',
+    );
+  }
+
+  Future<void> _openPhoneDialer(BuildContext context) async {
+    await _launchExternalUri(
+      context,
+      phoneDialUri,
+      'تعذر فتح تطبيق الاتصال.',
+    );
+  }
+
+  Future<void> _launchExternalUri(
+    BuildContext context,
+    Uri uri,
+    String errorMessage,
+  ) async {
+    try {
+      final opened = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!opened && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    }
   }
 }
