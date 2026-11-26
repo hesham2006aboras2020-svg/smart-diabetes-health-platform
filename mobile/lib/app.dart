@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,7 +26,6 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
     super.initState();
     final auth = ref.read(authControllerProvider);
     _authStatus = auth.status;
-    _role = auth.role;
 
     _router = GoRouter(
       initialLocation: '/',
@@ -68,7 +66,6 @@ class _DiabetesAppState extends ConsumerState<DiabetesApp> {
 
     ref.listenManual<AuthState>(authControllerProvider, (_, next) {
       _authStatus = next.status;
-      _role = next.role;
       _routerRefresh.value++;
     });
   }
