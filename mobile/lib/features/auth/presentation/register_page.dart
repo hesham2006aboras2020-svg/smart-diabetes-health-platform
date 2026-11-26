@@ -74,9 +74,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             children: [
                               IconButton(
                                 tooltip: 'رجوع',
-                                onPressed: _submitting
-                                    ? null
-                                    : () => context.pop(),
+                                onPressed: _submitting ? null : () => context.pop(),
                                 icon: const Icon(Icons.arrow_forward),
                               ),
                               const SizedBox(width: 4),
@@ -140,10 +138,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             textInputAction: TextInputAction.next,
                             validator: (value) {
                               final phone = value?.trim() ?? '';
-                              final normalized = phone.replaceAll(
-                                RegExp(r'[^+0-9]'),
-                                '',
-                              );
+                              final normalized =
+                                  phone.replaceAll(RegExp(r'[^+0-9]'), '');
                               if (normalized.isEmpty) {
                                 return 'أدخل رقم الهاتف.';
                               }
@@ -177,6 +173,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                             minLines: 1,
                             maxLines: 1,
                             obscureText: _obscurePassword,
+                            keyboardType: TextInputType.number,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
                               labelText: 'كلمة المرور',
@@ -199,13 +196,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                               if (value == null || value.isEmpty) {
                                 return 'أدخل كلمة المرور.';
                               }
-                              if (value.length < 8) {
-                                return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
-                              }
-                              if (!RegExp(r'[A-Z]').hasMatch(value) ||
-                                  !RegExp(r'[a-z]').hasMatch(value) ||
-                                  !RegExp(r'[0-9]').hasMatch(value)) {
-                                return 'استخدم حرفًا كبيرًا وصغيرًا ورقمًا.';
+                              if (!RegExp(r'^\d{6,15}$').hasMatch(value)) {
+                                return 'كلمة المرور يجب أن تكون من 6 إلى 15 رقمًا فقط.';
                               }
                               return null;
                             },
@@ -261,16 +253,22 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
                                 ? const SizedBox(
                                     width: 20,
                                     height: 20,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   )
                                 : const Icon(Icons.person_add_alt_1),
                             label: Text(
-                              _submitting ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب',
+                              _submitting
+                                  ? 'جارٍ إنشاء الحساب...'
+                                  : 'إنشاء الحساب',
                             ),
                           ),
                           const SizedBox(height: 8),
                           TextButton(
-                            onPressed: _submitting ? null : () => context.go('/login'),
+                            onPressed: _submitting
+                                ? null
+                                : () => context.go('/login'),
                             child: const Text('لديك حساب؟ تسجيل الدخول'),
                           ),
                         ],
